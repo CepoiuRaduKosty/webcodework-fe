@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
+
+// A simple component to handle root redirection logic
+const RootRedirect: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or your main app loader
+  }
+
+  // If authenticated, go to dashboard, otherwise go to login
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+};
+
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <AuthProvider> {/* Wrap routes needing auth context */}
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          {/* Protected Routes */}
+           <Route path="/dashboard" element={<ProtectedRoute />}>
+                {/* Outlet renders the nested component */}
+                <Route index element={<DashboardPage />} />
+                {/* Add other protected routes here nested under ProtectedRoute */}
+                {/* e.g., <Route path="settings" element={<SettingsPage />} /> */}
+           </Route>
+
+          {/* Root path redirection */}
+           <Route path="/" element={<RootRedirect />} />
+
+          {/* Fallback for unmatched routes (optional) */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+           {/* Or a dedicated 404 component: <Route path="*" element={<NotFoundPage />} /> */}
+
+        </Routes>
+      </AuthProvider>
+    </Router>
+  );
 }
 
-export default App
+export default App;
