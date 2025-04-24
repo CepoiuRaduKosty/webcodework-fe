@@ -8,6 +8,7 @@ import {
     SubmittedFileDto,
     GradeSubmissionDto // Assuming you might need this later for teachers
 } from '../types/assignment.ts'; // We'll define these types next
+import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
 // === Assignment Management ===
 
@@ -91,4 +92,11 @@ export const submitAssignment = async (assignmentId: string | number): Promise<S
     }
 };
 
-// Add teacher/grading functions here later if needed...
+export const getSubmissionsForAssignment = async (assignmentId: string | number): Promise<TeacherSubmissionViewDto[]> => {
+    try {
+        const response = await api.get<TeacherSubmissionViewDto[]>(`/api/assignments/${assignmentId}/submissions`);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to fetch assignment submissions');
+    }
+};

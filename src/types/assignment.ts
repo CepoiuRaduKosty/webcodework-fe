@@ -58,3 +58,14 @@ export interface GradeSubmissionDto {
   grade?: number | null;
   feedback?: string | null;
 }
+
+export interface TeacherSubmissionViewDto {
+    studentId: number;
+    studentUsername: string;
+    submissionId?: number | null; // Nullable if not submitted
+    submittedAt?: string | null; // ISO date string
+    isLate: boolean;
+    grade?: number | null;
+    hasFiles: boolean;
+    status: string; // "Not Submitted", "Submitted", "Late", "Graded", "In Progress"
+}

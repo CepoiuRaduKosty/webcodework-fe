@@ -5,6 +5,7 @@ import * as classroomService from '../services/classroomService';
 import * as assignmentService from '../services/assignmentService'
 import { ClassroomDetailsDto, ClassroomMemberDto, ClassroomRole, AddMemberPayload } from '../types/classroom';
 import { AssignmentBasicDto, CreateAssignmentDto } from '../types/assignment';
+import { formatDate } from 'date-fns';
 //import { assignmentService } from '../services/assignmentService'
 
 // Simple Modal Component (example - consider using a library like Headless UI or react-modal)
@@ -197,6 +198,8 @@ const ClassroomPage: React.FC = () => {
   const teachers = details.members.filter(m => m.role === ClassroomRole.Teacher);
   const students = details.members.filter(m => m.role === ClassroomRole.Student);
 
+  const isTeacherOrOwner = details?.currentUserRole === ClassroomRole.Owner || details?.currentUserRole === ClassroomRole.Teacher;
+
   return (
     <div className="container mx-auto mt-6 md:mt-10 p-4 md:p-0">
       {/* Back Link & Header */}
@@ -234,28 +237,38 @@ const ClassroomPage: React.FC = () => {
               <p className="text-gray-500 italic">No assignments created yet.</p>
             ) : (
               <ul className="space-y-4">
-                {assignments.map((assignment) => (
-                  <li key={assignment.id} className="border border-gray-200 rounded p-3 hover:bg-gray-50 transition duration-150">
-                    <Link to={`/assignments/${assignment.id}`} className="block">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-semibold text-indigo-700 hover:underline">{assignment.title}</span>
-                        {assignment.submissionStatus && (
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${assignment.submissionStatus === 'Graded' ? 'bg-green-100 text-green-800' :
-                              assignment.submissionStatus.includes('Submitted') ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-600'
-                            }`}>
-                            {assignment.submissionStatus}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-500 space-x-3">
-                        <span>Created: {new Date(assignment.createdAt).toLocaleDateString()}</span>
-                        {assignment.dueDate && <span>Due: {new Date(assignment.dueDate).toLocaleDateString()} {new Date(assignment.dueDate).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>}
-                        {assignment.maxPoints && <span>Points: {assignment.maxPoints}</span>}
-                      </div>
-                    </Link>
-                  </li>
-                ))}
+                {assignments.map((assignment) => {
+                  // Determine the link based on the user's role in THIS classroom
+                  const assignmentLink = isTeacherOrOwner
+                    ? `/assignments/${assignment.id}/manage` // Link for Teachers/Owners
+                    : `/assignments/${assignment.id}`;      // Link for Students
+
+                  return (
+                    <li key={assignment.id} className="border border-gray-200 rounded p-3 hover:bg-gray-50 transition duration-150">
+                      {/* Use the determined link */}
+                      <Link to={assignmentLink} className="block">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-semibold text-indigo-700 hover:underline">{assignment.title}</span>
+                          {/* Conditionally render status ONLY if user is likely a student */}
+                          {/* We check 'assignment.submissionStatus' which is ONLY populated for students by the API */}
+                          {assignment.submissionStatus && (
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${assignment.submissionStatus === 'Graded' ? 'bg-green-100 text-green-800' :
+                                assignment.submissionStatus.includes('Submitted') ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-600'
+                              }`}>
+                              {assignment.submissionStatus}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 space-x-3">
+                          <span>Created: {new Date(assignment.createdAt).toLocaleDateString()}</span>
+                          {assignment.dueDate && <span>Due: {formatDate(assignment.dueDate, 'dd.mm.yy')}</span>}
+                          {assignment.maxPoints && <span>Points: {assignment.maxPoints}</span>}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )
           )}
