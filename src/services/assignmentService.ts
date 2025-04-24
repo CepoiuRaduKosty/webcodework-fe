@@ -6,7 +6,8 @@ import {
     CreateAssignmentDto,
     SubmissionDto,
     SubmittedFileDto,
-    GradeSubmissionDto // Assuming you might need this later for teachers
+    GradeSubmissionDto, // Assuming you might need this later for teachers
+    CreateVirtualFilePayload
 } from '../types/assignment.ts'; // We'll define these types next
 import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
@@ -70,6 +71,7 @@ export const uploadSubmissionFile = async (assignmentId: string | number, file: 
         });
         return response.data;
     } catch (error: any) {
+        console.log(error)
         throw error.response?.data || new Error('File upload failed');
     }
 };
@@ -98,5 +100,41 @@ export const getSubmissionsForAssignment = async (assignmentId: string | number)
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to fetch assignment submissions');
+    }
+};
+
+export const getFileContent = async (submissionId: string | number, fileId: string | number): Promise<string> => {
+    try {
+        // Expecting plain text response
+        const response = await api.get<string>(`/api/submissions/${submissionId}/files/${fileId}/content`, {
+            headers: { 'Accept': 'text/plain' }, // Explicitly ask for text
+            // Important: Tell Axios the expected response type is text
+            // Note: Axios might automatically handle common text types, but this can help
+            // responseType: 'text' // Usually not needed for GET if server sets Content-Type correctly
+        });
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to fetch file content');
+    }
+};
+
+export const updateFileContent = async (submissionId: string | number, fileId: string | number, content: string): Promise<void> => { // Or return updated SubmittedFileDto
+    try {
+        await api.put(`/api/submissions/${submissionId}/files/${fileId}/content`, content, { // Send raw string as data
+            headers: { 'Content-Type': 'text/plain' }, // Set content type of request body
+        });
+        // Optionally return updated file metadata if backend provides it
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to save file content');
+    }
+};
+
+export const createVirtualFile = async (assignmentId: string | number, fileName: string): Promise<SubmittedFileDto> => {
+    try {
+        const payload: CreateVirtualFilePayload = { fileName };
+        const response = await api.post<SubmittedFileDto>(`/api/assignments/${assignmentId}/submissions/my/create-file`, payload);
+        return response.data;
+    } catch (error: any) {
+         throw error.response?.data || new Error(`Failed to create file '${fileName}'`);
     }
 };

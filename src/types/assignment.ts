@@ -69,3 +69,7 @@ export interface TeacherSubmissionViewDto {
     hasFiles: boolean;
     status: string; // "Not Submitted", "Submitted", "Late", "Graded", "In Progress"
 }
+
+export interface CreateVirtualFilePayload {
+    fileName: string;
+}
