@@ -7,7 +7,9 @@ import {
     SubmissionDto,
     SubmittedFileDto,
     GradeSubmissionDto, // Assuming you might need this later for teachers
-    CreateVirtualFilePayload
+    CreateVirtualFilePayload,
+    TestCaseDetailDto,
+    TestCaseListDto
 } from '../types/assignment.ts'; // We'll define these types next
 import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
@@ -136,5 +138,81 @@ export const createVirtualFile = async (assignmentId: string | number, fileName:
         return response.data;
     } catch (error: any) {
          throw error.response?.data || new Error(`Failed to create file '${fileName}'`);
+    }
+};
+
+export const getTestCaseInputContent = async (testCaseId: string | number): Promise<string> => {
+    try {
+        const response = await api.get<string>(`/api/testcases/${testCaseId}/input/content`, { headers: { 'Accept': 'text/plain' }});
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to fetch test case input content');
+    }
+};
+
+export const getTestCaseOutputContent = async (testCaseId: string | number): Promise<string> => {
+    try {
+        const response = await api.get<string>(`/api/testcases/${testCaseId}/output/content`, { headers: { 'Accept': 'text/plain' }});
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to fetch test case output content');
+    }
+};
+
+export const updateTestCaseInputContent = async (testCaseId: string | number, content: string): Promise<void> => {
+    try {
+        await api.put(`/api/testcases/${testCaseId}/input/content`, content, { headers: { 'Content-Type': 'text/plain' } });
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to save test case input content');
+    }
+};
+
+export const updateTestCaseOutputContent = async (testCaseId: string | number, content: string): Promise<void> => {
+     try {
+        await api.put(`/api/testcases/${testCaseId}/output/content`, content, { headers: { 'Content-Type': 'text/plain' } });
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to save test case output content');
+    }
+};
+
+// Function to add a test case, potentially with empty files initially
+export const addTestCase = async (assignmentId: string | number, inputFileName: string, outputFileName: string): Promise<TestCaseDetailDto> => {
+    // We send FormData, but without actual file blobs if creating empty ones.
+    // The backend POST endpoint needs to handle `[FromForm] AddTestCaseDto` which has nullable IFormFiles.
+    const formData = new FormData();
+    // Append filenames - backend will use these if files are null/empty
+    formData.append('InputFileName', inputFileName);
+    formData.append('OutputFileName', outputFileName);
+    // IMPORTANT: Do NOT append InputFile or OutputFile if you want them created empty by the backend service logic.
+    // If you WERE uploading files:
+    // if (inputFileObject) formData.append('InputFile', inputFileObject);
+    // if (outputFileObject) formData.append('OutputFile', outputFileObject);
+
+    try {
+        const response = await api.post<TestCaseDetailDto>(`/api/assignments/${assignmentId}/testcases`, formData, {
+            headers: {
+                // Content-Type will be set automatically by browser for FormData
+            }
+        });
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to add test case');
+    }
+};
+
+export const getTestCases = async (assignmentId: string | number): Promise<TestCaseListDto[]> => {
+    try {
+        const response = await api.get<TestCaseListDto[]>(`/api/assignments/${assignmentId}/testcases`);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to fetch test cases');
+    }
+};
+
+export const deleteTestCase = async (assignmentId: string | number, testCaseId: string | number): Promise<void> => {
+    try {
+        await api.delete(`/api/assignments/${assignmentId}/testcases/${testCaseId}`);
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to delete test case');
     }
 };

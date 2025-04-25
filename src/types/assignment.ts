@@ -25,6 +25,7 @@ export interface AssignmentDetailsDto extends AssignmentBasicDto {
     createdById: number;
     createdByUsername: string;
     classroomId: number;
+    isCodeAssignment: boolean;
     // Add currentUserRole if backend provides it, otherwise infer from context/other calls
 }
 
@@ -72,4 +73,22 @@ export interface TeacherSubmissionViewDto {
 
 export interface CreateVirtualFilePayload {
     fileName: string;
+}
+
+export interface TestCaseListDto {
+    id: number;
+    inputFileName: string;
+    expectedOutputFileName: string;
+    addedAt: string; // ISO date string
+    addedByUsername: string;
+}
+
+export interface TestCaseDetailDto extends TestCaseListDto {
+    // Add other details if returned by backend
+}
+
+// Optional: Type for the currently editing test case state
+export interface EditingTestCaseState extends TestCaseListDto {
+    inputContent: string;
+    outputContent: string;
 }
