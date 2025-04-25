@@ -7,6 +7,7 @@ export interface CreateAssignmentDto {
     instructions?: string;
     dueDate?: string | null; // Use ISO string format for dates or Date object
     maxPoints?: number | null;
+    isCodeAssignment: boolean;
 }
 
 // Matches backend DTO: AssignmentBasicDto
