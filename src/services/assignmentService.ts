@@ -175,27 +175,31 @@ export const updateTestCaseOutputContent = async (testCaseId: string | number, c
     }
 };
 
-// Function to add a test case, potentially with empty files initially
+// MODIFIED Function to add a test case
 export const addTestCase = async (assignmentId: string | number, inputFileName: string, outputFileName: string): Promise<TestCaseDetailDto> => {
-    // We send FormData, but without actual file blobs if creating empty ones.
-    // The backend POST endpoint needs to handle `[FromForm] AddTestCaseDto` which has nullable IFormFiles.
     const formData = new FormData();
-    // Append filenames - backend will use these if files are null/empty
     formData.append('InputFileName', inputFileName);
     formData.append('OutputFileName', outputFileName);
-    // IMPORTANT: Do NOT append InputFile or OutputFile if you want them created empty by the backend service logic.
-    // If you WERE uploading files:
-    // if (inputFileObject) formData.append('InputFile', inputFileObject);
-    // if (outputFileObject) formData.append('OutputFile', outputFileObject);
+    // No actual file blobs appended here for empty file creation
 
     try {
-        const response = await api.post<TestCaseDetailDto>(`/api/assignments/${assignmentId}/testcases`, formData, {
-            headers: {
-                // Content-Type will be set automatically by browser for FormData
+        const response = await api.post<TestCaseDetailDto>(
+            `/api/assignments/${assignmentId}/testcases`, // URL
+            formData, // Data
+            { // <--- Axios Request Config Options HERE
+                headers: {
+                    // Explicitly set Content-Type to undefined for this request.
+                    // This tells Axios to IGNORE the global default and correctly
+                    // set 'multipart/form-data; boundary=...' based on the FormData object.
+                    'Content-Type': undefined
+                    // Alternatively, sometimes null works too: 'Content-Type': null
+                    // Avoid setting 'multipart/form-data' manually as Axios handles the boundary.
+                }
             }
-        });
+        );
         return response.data;
     } catch (error: any) {
+        console.error("Add Test Case Error:", error.response?.data || error.message);
         throw error.response?.data || new Error('Failed to add test case');
     }
 };
