@@ -6,6 +6,8 @@ export interface TestCaseListDto {
     addedAt: string; // ISO date string
     addedByUsername: string;
     points: number;
+    maxExecutionTimeMs: number;
+    maxRamMB: number;
 }
 
 export interface TestCaseDetailDto extends TestCaseListDto {

@@ -40,14 +40,19 @@ export const TestCaseList: React.FC<{ testCases: TestCaseListDto[], assignmentDe
             <ul className="space-y-3 mb-6">
                 {testCases.map((tc, index) => (
                     <li key={tc.id} className={`border rounded p-3 flex justify-between items-center text-sm ${showEditorPanelList[index] === true ? 'flex-col items-start' : ''}`}>
-                        <div>
+                        <div className="flex-grow">
                             <div className="font-medium text-gray-800">
                                 <span className="text-indigo-600">{tc.inputFileName}</span>
                                 <span className="text-gray-400 mx-1">/</span>
                                 <span className="text-indigo-600">{tc.expectedOutputFileName}</span>
                             </div>
+                            <div className="text-xs text-gray-500 mt-1 space-x-2">
+                                <span>Points: <span className="font-semibold">{tc.points}</span></span>
+                                <span className="border-l pl-2">Time: <span className="font-semibold">{tc.maxExecutionTimeMs}ms</span></span>
+                                <span className="border-l pl-2">RAM: <span className="font-semibold">{tc.maxRamMB}MB</span></span>
+                            </div>
                             <p className="text-xs text-gray-500 mt-1">
-                                Points: <span className="font-semibold">{tc.points}</span> | Added by {tc.addedByUsername} on {formatDate(tc.addedAt)}
+                                Added by {tc.addedByUsername} on {formatDate(tc.addedAt)}
                             </p>
                         </div>
                         <div className="flex space-x-2">
