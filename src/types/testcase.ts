@@ -5,6 +5,7 @@ export interface TestCaseListDto {
     expectedOutputFileName: string;
     addedAt: string; // ISO date string
     addedByUsername: string;
+    points: number;
 }
 
 export interface TestCaseDetailDto extends TestCaseListDto {

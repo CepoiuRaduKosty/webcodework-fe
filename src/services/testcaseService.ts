@@ -39,10 +39,11 @@ export const updateTestCaseOutputContent = async (testCaseId: string | number, c
 };
 
 // MODIFIED Function to add a test case
-export const addTestCase = async (assignmentId: string | number, inputFileName: string, outputFileName: string): Promise<TestCaseDetailDto> => {
+export const addTestCase = async (assignmentId: string | number, inputFileName: string, outputFileName: string, points: number): Promise<TestCaseDetailDto> => {
     const formData = new FormData();
     formData.append('InputFileName', inputFileName);
     formData.append('OutputFileName', outputFileName);
+    formData.append('Points', points.toString());
     // No actual file blobs appended here for empty file creation
 
     try {

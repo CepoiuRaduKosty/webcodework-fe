@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Modal } from "../Modal"
 import { AssignmentDetailsDto } from "../../types/assignment";
 import * as testcaseService from '../../services/testcaseService'
@@ -6,7 +6,25 @@ import * as testcaseService from '../../services/testcaseService'
 export const AddTestCaseModal: React.FC<{assignmentDetails: AssignmentDetailsDto, show: boolean, onSuccessCallback: () => Promise<void>, onCancelCallback: () => void }> = ({ assignmentDetails, show, onCancelCallback, onSuccessCallback }) => {
     const [addTestCaseError, setAddTestCaseError] = useState<string | null>(null);
     const [newTestCaseBaseName, setNewTestCaseBaseName] = useState(''); // e.g., "test1", "edge_case"
+    const [newTestCasePoints, setNewTestCasePoints] = useState<string>('10');
     const [isAddingTestCase, setIsAddingTestCase] = useState(false);
+
+    const resetForm = () => {
+        setNewTestCaseBaseName('');
+        setNewTestCasePoints('10'); // Reset points
+        setAddTestCaseError(null);
+        setIsAddingTestCase(false); // Ensure button is re-enabled
+    };
+
+    useEffect(() => {
+        if (!show) {
+            // Add a small delay if your modal has closing animations
+            const timer = setTimeout(() => {
+                resetForm();
+            }, 150);
+            return () => clearTimeout(timer);
+        }
+    }, [show]);
 
     // Add Test Case Handler
     const handleAddTestCase = async (e: FormEvent) => {
@@ -19,6 +37,11 @@ export const AddTestCaseModal: React.FC<{assignmentDetails: AssignmentDetailsDto
             setAddTestCaseError("Base name can only contain letters, numbers, underscores, and hyphens."); return;
         }
 
+        const pointsNum = parseInt(newTestCasePoints, 10);
+        if (isNaN(pointsNum) || pointsNum < 0 || pointsNum > 1000) { // Example validation
+            setAddTestCaseError("Points must be a valid number between 0 and 1000."); return;
+        }
+
         setAddTestCaseError(null);
         setIsAddingTestCase(true);
 
@@ -28,7 +51,7 @@ export const AddTestCaseModal: React.FC<{assignmentDetails: AssignmentDetailsDto
 
         try {
             // Call service function adjusted to send names, no files
-            await testcaseService.addTestCase(assignmentDetails.id, inputFileName, outputFileName);
+            await testcaseService.addTestCase(assignmentDetails.id, inputFileName, outputFileName, pointsNum);
             setNewTestCaseBaseName('');
             onSuccessCallback();
         } catch (err: any) {
@@ -56,6 +79,24 @@ export const AddTestCaseModal: React.FC<{assignmentDetails: AssignmentDetailsDto
                     />
                     <p className="text-xs text-gray-500 mt-1">Creates empty 'basename.in' and 'basename.out' files. You can edit them after creation.</p>
                 </div>
+                {/* --- NEW Points Input --- */}
+                <div className="mb-3">
+                    <label htmlFor="testCasePoints" className="block text-sm font-medium text-gray-700 mb-1">
+                        Points <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        id="testCasePoints"
+                        type="number"
+                        value={newTestCasePoints}
+                        onChange={(e) => setNewTestCasePoints(e.target.value)}
+                        min="0"
+                        step="1"
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="e.g., 10"
+                        required
+                    />
+                </div>
+                {/* --- End Points Input --- */}
                 <button
                     type="submit"
                     disabled={isAddingTestCase}
