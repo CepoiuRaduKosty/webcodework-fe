@@ -1,5 +1,4 @@
 // src/types/assignment.ts
-import { ClassroomRole } from './classroom'; // Assuming ClassroomRole is defined here or import from appropriate place
 
 // Matches backend DTO: CreateAssignmentDto
 export interface CreateAssignmentDto {
@@ -74,22 +73,4 @@ export interface TeacherSubmissionViewDto {
 
 export interface CreateVirtualFilePayload {
     fileName: string;
-}
-
-export interface TestCaseListDto {
-    id: number;
-    inputFileName: string;
-    expectedOutputFileName: string;
-    addedAt: string; // ISO date string
-    addedByUsername: string;
-}
-
-export interface TestCaseDetailDto extends TestCaseListDto {
-    // Add other details if returned by backend
-}
-
-// Optional: Type for the currently editing test case state
-export interface EditingTestCaseState extends TestCaseListDto {
-    inputContent: string;
-    outputContent: string;
 }
