@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubmissionDto, SubmittedFileDto } from "../types/assignment";
 import * as assignmentService from '../services/assignmentService';
 import * as evaluationService from '../services/evaluationService';
-import { EvaluationStatus, FrontendEvaluateResponseDto } from "../types/evaluation";
+import { FrontendEvaluateResponseDto } from "../types/evaluation";
 import { Editor } from "@monaco-editor/react";
 import { AssignmentEvaluationResult } from "./AssignmentEvaluationResult";
+import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 
 export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefined, mySubmission: SubmissionDto | null, callbackRefreshSubmittedFiles: () => Promise<void> }> = ({ assignmentId, mySubmission, callbackRefreshSubmittedFiles }) => {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -18,6 +19,59 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
     const [evaluationResult, setEvaluationResult] = useState<FrontendEvaluateResponseDto | null>(null);
     const [evaluationError, setEvaluationError] = useState<string | null>(null);
+
+    const [hubConnection, setHubConnection] = useState<HubConnection | null>(null);
+    const [isHubConnected, setIsHubConnected] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (mySubmission?.id) { 
+            const newConnection = new HubConnectionBuilder()
+                .withUrl(`${import.meta.env.VITE_API_BASE_URL}/evaluationHub`, {
+                    accessTokenFactory: () => {
+                        const token = localStorage.getItem('authTokenData'); 
+                        if (token) {
+                            return JSON.parse(token).token;
+                        }
+                        return "";
+                    }
+                })
+                .withAutomaticReconnect()
+                .configureLogging(LogLevel.Information) 
+                .build();
+
+            setHubConnection(newConnection);
+        }
+
+        return () => {
+            hubConnection?.stop().catch(err => console.error("Error stopping SignalR connection: ", err));
+        };
+    }, [mySubmission?.id]);
+
+    useEffect(() => {
+        if (hubConnection) {
+            hubConnection.start()
+                .then(() => {
+                    console.log('SignalR Connected for EvaluationHub.');
+                    hubConnection.on("ReceiveEvaluationResult", (result: FrontendEvaluateResponseDto, evaluatedSubmissionId: number) => {
+                        console.log("SignalR ReceiveEvaluationResult:", result, "for submission:", evaluatedSubmissionId);
+                        if (mySubmission?.id === evaluatedSubmissionId) {
+                            setEvaluationResult(result);
+                            setIsEvaluating(false);
+                            setEvaluationError(null);
+                        }
+                    });
+                })
+                .catch(err => {
+                    console.error('SignalR Connection Error: ', err);
+                    setEvaluationError("Could not connect to the evaluation service for real-time updates.");
+                });
+            setIsHubConnected(true);
+            return () => {
+                hubConnection.off("ReceiveEvaluationResult");
+            };
+        }
+    }, [hubConnection, mySubmission?.id]);
+
 
     const handleOpenEditor = async () => {
         if (!assignmentId) return;
@@ -72,6 +126,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     };
 
     const handleEvaluateSolution = async () => {
+        console.log("a intrat")
         if (!mySubmission?.id) {
             setEvaluationError("Submission details are not available. Please save your solution.c first.");
             return;
@@ -86,12 +141,10 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
         setEvaluationError(null);
 
         try {
-            const result = await evaluationService.triggerSubmissionEvaluation(mySubmission.id);
-            setEvaluationResult(result);
+            const response = await evaluationService.triggerSubmissionEvaluation(mySubmission.id);
+            console.log("Trigger evaluation response:", response);
         } catch (err: any) {
             setEvaluationError(err.message || 'An unknown error occurred during evaluation.');
-        } finally {
-            setIsEvaluating(false);
         }
     };
 
@@ -137,7 +190,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     };
 
     const solutionFileExists = mySubmission?.submittedFiles?.some(f => f.fileName.toLowerCase() === 'solution.c');
-
+    console.log(isEvaluating || isEditorOpen || !hubConnection || !isHubConnected)
 
     return <>
         <div className="my-4 p-3 border rounded bg-blue-50">
@@ -154,8 +207,8 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                     {solutionFileExists && !mySubmission?.submittedAt && (
                         <button
                             onClick={handleEvaluateSolution}
-                            disabled={isEvaluating || isEditorOpen} // Disable if editor is open to avoid conflicts
-                            title={isEditorOpen ? "Close editor to evaluate" : "Evaluate your solution.c against test cases"}
+                            disabled={isEvaluating || isEditorOpen || !hubConnection || !isHubConnected }
+                            title={isEditorOpen ? "Close editor to evaluate" : !hubConnection || !isHubConnected ? "Evaluation service not connected" : "Evaluate your solution.c"}
                             className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isEvaluating ? 'bg-orange-300 cursor-wait animate-pulse' : 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-400'} ${isEditorOpen ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             {isEvaluating ? 'Evaluating...' : 'Evaluate Solution'}

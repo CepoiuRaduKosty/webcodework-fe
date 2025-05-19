@@ -64,7 +64,7 @@ export const AssignmentStudentWork: React.FC<{ assignmentId: string | undefined,
             {isLoadingSubmission && <p>Loading...</p>}
             {!isLoadingSubmission && <>
                 <AssignmentWorkStatus assignmentDetails={assignmentDetails} mySubmission={mySubmission!} />
-                {canModifySubmission && ( // Only show if student can modify
+                {canModifySubmission && (
                     <AssignmentStudentEditCode assignmentId={assignmentId} mySubmission={mySubmission} callbackRefreshSubmittedFiles={fetchMySubmissionData}/>
                 )}
                 <AssignmentStudentManageFiles mySubmission={mySubmission} canModifySubmission={canModifySubmission} assignmentId={assignmentId} callbackRefetchFiles={fetchMySubmissionData}/>
