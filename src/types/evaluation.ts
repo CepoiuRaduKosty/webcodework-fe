@@ -26,8 +26,12 @@ export interface FrontendTestCaseResultDto {
 
 // Corresponds to OrchestrationEvaluateResponse from main backend
 export interface FrontendEvaluateResponseDto {
+    submissionId?: number;
+    evaluatedLanguage?: string;
     overallStatus: string;
     compilationSuccess: boolean;
     compilerOutput?: string | null;
     results: FrontendTestCaseResultDto[];
+    pointsObtained?: number | null;
+    totalPossiblePoints?: number | null;
 }
