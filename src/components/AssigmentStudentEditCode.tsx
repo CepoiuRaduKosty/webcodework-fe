@@ -6,6 +6,7 @@ import { FrontendEvaluateResponseDto } from "../types/evaluation";
 import { Editor } from "@monaco-editor/react";
 import { AssignmentEvaluationResult } from "./AssignmentEvaluationResult";
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { SUPPORTED_LANGUAGES, SOLUTION_FILENAME } from "../config/languages"
 
 export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefined, mySubmission: SubmissionDto | null, callbackRefreshSubmittedFiles: () => Promise<void> }> = ({ assignmentId, mySubmission, callbackRefreshSubmittedFiles }) => {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -22,6 +23,11 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
 
     const [hubConnection, setHubConnection] = useState<HubConnection | null>(null);
     const [isHubConnected, setIsHubConnected] = useState<boolean>(false);
+
+    const [selectedLanguage, setSelectedLanguage] = useState<string>(SUPPORTED_LANGUAGES[0].value);
+
+    const solutionFile = mySubmission?.submittedFiles?.find(f => f.fileName.toLowerCase() === SOLUTION_FILENAME);
+    const solutionFileExists = !!solutionFile;
 
     useEffect(() => {
         if (mySubmission?.id) { 
@@ -79,39 +85,31 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
         setEditorError(null);
         setSaveStatus('idle');
 
-        // Find if solution.c already exists
-        // Ensure mySubmission state is up-to-date before this check runs
-        const solutionFile = mySubmission?.submittedFiles?.find(f => f.fileName.toLowerCase() === 'solution.c');
+        const solutionFile = mySubmission?.submittedFiles?.find(f => f.fileName.toLowerCase() === SOLUTION_FILENAME);
 
         try {
             let targetFile: SubmittedFileDto | null = solutionFile ?? null;
             let initialContent = '';
 
             if (solutionFile) {
-                // File exists, fetch its content
-                console.log("solution.c exists, fetching content...");
+                console.log("solution exists, fetching content...");
                 if (!mySubmission?.id) throw new Error("Submission ID missing");
                 initialContent = await assignmentService.getFileContent(mySubmission.id, solutionFile.id);
                 setEditingFile(solutionFile);
             } else {
-                // --- MODIFIED PART ---
-                // File doesn't exist, call the new endpoint to create it
-                console.log("solution.c does not exist, creating virtual file...");
+                console.log("solution does not exist, creating virtual file...");
                 try {
-                    // Call the new service function
-                    targetFile = await assignmentService.createVirtualFile(assignmentId, 'solution.c');
-                    console.log("Created solution.c file record:", targetFile);
-                    setEditingFile(targetFile); // Set the newly created file as the one being edited
-                    // Re-fetch submission data to include the new file in the list
-                    await callbackRefreshSubmittedFiles(); // This updates mySubmission state
+                    targetFile = await assignmentService.createVirtualFile(assignmentId, 'solution');
+                    console.log("Created solution file record:", targetFile);
+                    setEditingFile(targetFile);
+                    await callbackRefreshSubmittedFiles();
                 } catch (createErr: any) {
-                    console.error("Failed to create solution.c:", createErr);
-                    setEditorError(`Failed to create 'solution.c': ${createErr.message}`);
+                    console.error("Failed to create solution:", createErr);
+                    setEditorError(`Failed to create 'solution': ${createErr.message}`);
                     setIsEditorLoading(false);
-                    return; // Stop if file creation fails
+                    return; 
                 }
-                initialContent = ''; // Start with empty content for new file
-                // --- END MODIFIED PART ---
+                initialContent = '';
             }
 
             setEditorContent(initialContent);
@@ -128,11 +126,11 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     const handleEvaluateSolution = async () => {
         console.log("a intrat")
         if (!mySubmission?.id) {
-            setEvaluationError("Submission details are not available. Please save your solution.c first.");
+            setEvaluationError("Submission details are not available. Please save your solution first.");
             return;
         }
         if (!solutionFileExists) {
-            setEvaluationError("'solution.c' file not found in your submission. Please create or upload it first.");
+            setEvaluationError("'solution' file not found in your submission. Please create or upload it first.");
             return;
         }
 
@@ -141,7 +139,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
         setEvaluationError(null);
 
         try {
-            const response = await evaluationService.triggerSubmissionEvaluation(mySubmission.id);
+            const response = await evaluationService.triggerSubmissionEvaluation(mySubmission.id, selectedLanguage);
             console.log("Trigger evaluation response:", response);
         } catch (err: any) {
             setEvaluationError(err.message || 'An unknown error occurred during evaluation.');
@@ -150,7 +148,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
 
     const handleEditorChange = (value: string | undefined) => {
         setEditorContent(value ?? '');
-        if (saveStatus === 'saved') setSaveStatus('idle'); // Reset save status on edit
+        if (saveStatus === 'saved') setSaveStatus('idle'); 
         if (saveStatus === 'error') setSaveStatus('idle');
     };
 
@@ -166,9 +164,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
         try {
             await assignmentService.updateFileContent(mySubmission.id, editingFile.id, editorContent);
             setSaveStatus('saved');
-            // Optionally re-fetch submission data if file metadata (like size) needs updating in the UI
-            // await fetchMySubmissionData();
-            setTimeout(() => { if (isEditorOpen) setSaveStatus('idle'); }, 2000); // Reset status after a delay
+            setTimeout(() => { if (isEditorOpen) setSaveStatus('idle'); }, 2000); 
 
         } catch (err: any) {
             setEditorError(err.message || 'Failed to save content.');
@@ -177,23 +173,35 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     };
 
     const handleCloseEditor = () => {
-        // Optional: Confirm closing if there are unsaved changes
-        // if (saveStatus === 'idle' && editorContent !== originalContent) {
-        //     if (!window.confirm("You have unsaved changes. Are you sure you want to close?")) return;
-        // }
         setIsEditorOpen(false);
-        setEditorError(null); // Clear errors on close
-        setSaveStatus('idle'); // Reset save status
-        // Maybe clear editorContent and editingFile? Optional.
-        // setEditorContent('');
-        // setEditingFile(null);
+        setEditorError(null); 
+        setSaveStatus('idle'); 
     };
 
-    const solutionFileExists = mySubmission?.submittedFiles?.some(f => f.fileName.toLowerCase() === 'solution.c');
-    console.log(isEvaluating || isEditorOpen || !hubConnection || !isHubConnected)
+    const monacoLanguage = SUPPORTED_LANGUAGES.find(lang => lang.value === selectedLanguage)?.monacoLang || "plaintext";
 
     return <>
-        <div className="my-4 p-3 border rounded bg-blue-50">
+        <div className="my-4 p-4 border rounded bg-blue-50">
+            {!isEditorOpen && !isEvaluating && ( // Show only when editor is closed and not evaluating
+                <div className="mb-3">
+                    <label htmlFor="languageSelect" className="block text-sm font-medium text-slate-700 mb-1">
+                        Select Language for Editor & Evaluation:
+                    </label>
+                    <select
+                        id="languageSelect"
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        disabled={isEditorOpen || isEvaluating}
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
+                    >
+                        {SUPPORTED_LANGUAGES.map(lang => (
+                            <option key={lang.value} value={lang.value}>
+                                {lang.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
             {!isEditorOpen && editorError && <p className="text-sm text-red-600 mb-2">{editorError}</p>}
             {!isEditorOpen && (
                 <div className="flex items-center space-x-3">
@@ -202,13 +210,13 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                         disabled={isEditorLoading}
                         className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isEditorLoading ? 'bg-gray-400 cursor-wait' : 'bg-slate-700 hover:bg-slate-800 focus:ring-slate-500'}`}
                     >
-                        {isEditorLoading ? 'Loading Editor...' : (solutionFileExists ? 'Edit solution.c' : 'Start solution.c')}
+                        {isEditorLoading ? 'Loading Editor...' : (solutionFileExists ? 'Edit solution' : 'Start solution')}
                     </button>
                     {solutionFileExists && !mySubmission?.submittedAt && (
                         <button
                             onClick={handleEvaluateSolution}
                             disabled={isEvaluating || isEditorOpen || !hubConnection || !isHubConnected }
-                            title={isEditorOpen ? "Close editor to evaluate" : !hubConnection || !isHubConnected ? "Evaluation service not connected" : "Evaluate your solution.c"}
+                            title={isEditorOpen ? "Close editor to evaluate" : !hubConnection || !isHubConnected ? "Evaluation service not connected" : "Evaluate your solution"}
                             className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isEvaluating ? 'bg-orange-300 cursor-wait animate-pulse' : 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-400'} ${isEditorOpen ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             {isEvaluating ? 'Evaluating...' : 'Evaluate Solution'}
@@ -220,7 +228,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                 <div className="mt-4 mb-6 border rounded shadow-md overflow-hidden">
                     {/* Editor Header / Status Bar */}
                     <div className="flex justify-between items-center p-2 border-b bg-gray-100 text-xs">
-                        <span className="font-semibold text-gray-700">Editing: {editingFile?.fileName ?? 'solution.c'}</span>
+                        <span className="font-semibold text-gray-700">Editing: {editingFile?.fileName ?? 'solution'}</span>
                         {/* Save Status & Action Buttons */}
                         <div className="flex items-center space-x-2">
                             {saveStatus === 'saving' && <span className="text-blue-600 animate-pulse">Saving...</span>}
@@ -247,7 +255,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                         <Editor
                             // Set a suitable height for inline display
                             height="60vh" // Example: 60% of viewport height
-                            language="c"
+                            language={monacoLanguage}
                             theme="vs-dark"
                             value={editorContent}
                             onChange={handleEditorChange}
