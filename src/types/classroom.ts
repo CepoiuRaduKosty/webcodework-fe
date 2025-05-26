@@ -60,3 +60,9 @@ export interface UpdateClassroomPayload {
     name: string;
     description?: string | null; // Allow clearing description
 }
+
+export interface UserSearchResultDto { // Matches backend DTO
+    userId: number;
+    username: string;
+    profilePhotoUrl?: string | null;
+}

@@ -1,11 +1,11 @@
 // src/components/ClassroomMembersSection.tsx
 import React, { useState, useMemo, useEffect } from 'react';
-import { AddMemberPayload, ClassroomDetailsDto, ClassroomRole } from "../types/classroom";
+import { ClassroomDetailsDto, ClassroomRole } from "../types/classroom";
 import * as classroomService from '../services/classroomService';
 import { AddMemberModal } from './modals/AddMemberModal';
-import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa'; 
+import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa';
 
-const ITEMS_PER_PAGE = 5; 
+const ITEMS_PER_PAGE = 5;
 
 export const ClassroomMembersSection: React.FC<{
     details: ClassroomDetailsDto,
@@ -19,35 +19,36 @@ export const ClassroomMembersSection: React.FC<{
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(() => {
-        if(!showAddTeacherModal && !showAddStudentModal) {
-            setAddMemberError(null);
-        }
-    }, [showAddTeacherModal, showAddStudentModal]);
-
-
-    const handleAddMember = async (userIdNum: number, roleToAdd: 'Teacher' | 'Student') => {
+    const handlePerformAddMember = async (userIdNum: number, roleToAdd: 'Teacher' | 'Student') => {
         if (!details.id) {
-            setAddMemberError("Classroom ID is missing."); return;
+            setAddMemberError("Classroom ID is missing."); // This error will be shown in the modal
+            return; // Should not proceed
         }
         setAddMemberError(null);
         setIsAddingMember(true);
-        const payload: AddMemberPayload = { userId: userIdNum };
         try {
+            const payload = { userId: userIdNum };
             if (roleToAdd === 'Teacher') {
-                await classroomService.addTeacher(details.id, payload);
+                await classroomService.addTeacher(details.id.toString(), payload);
             } else {
-                await classroomService.addStudent(details.id, payload);
+                await classroomService.addStudent(details.id.toString(), payload);
             }
-            setShowAddTeacherModal(false); 
+            setShowAddTeacherModal(false); // Close respective modal on success
             setShowAddStudentModal(false);
             await refreshClassroomData();
         } catch (err: any) {
             setAddMemberError(err.message || `Failed to add ${roleToAdd.toLowerCase()}.`);
+            // Error is shown in the modal, modal remains open.
         } finally {
             setIsAddingMember(false);
         }
     };
+
+    useEffect(() => {
+        if (!showAddTeacherModal && !showAddStudentModal) {
+            setAddMemberError(null);
+        }
+    }, [showAddTeacherModal, showAddStudentModal]);
 
     const canAddTeacher = details.currentUserRole === ClassroomRole.Owner;
     const canAddStudent = details.currentUserRole === ClassroomRole.Owner || details.currentUserRole === ClassroomRole.Teacher;
@@ -111,7 +112,7 @@ export const ClassroomMembersSection: React.FC<{
                             onClick={() => setShowAddTeacherModal(true)}
                             className="w-full flex items-center justify-center px-3 py-2 bg-[#DBE2EF] text-[#3F72AF] rounded-md hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:ring-opacity-50 text-sm font-semibold transition-colors"
                         >
-                           <FaPlus className="mr-2"/> Add Teacher
+                            <FaPlus className="mr-2" /> Add Teacher
                         </button>
                     )}
                     {canAddStudent && (
@@ -119,7 +120,7 @@ export const ClassroomMembersSection: React.FC<{
                             onClick={() => setShowAddStudentModal(true)}
                             className="w-full flex items-center justify-center px-3 py-2 bg-[#DBE2EF] text-[#3F72AF] rounded-md hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:ring-opacity-50 text-sm font-semibold transition-colors"
                         >
-                           <FaPlus className="mr-2"/> Add Student
+                            <FaPlus className="mr-2" /> Add Student
                         </button>
                     )}
                 </div>
@@ -139,12 +140,12 @@ export const ClassroomMembersSection: React.FC<{
                 </div>
 
                 {/* Member List */}
-                {filteredMembers.length === 0 && searchTerm && ( 
-                     <p className="text-sm text-gray-500 text-center py-4">No members found matching "{searchTerm}".</p>
+                {filteredMembers.length === 0 && searchTerm && (
+                    <p className="text-sm text-gray-500 text-center py-4">No members found matching "{searchTerm}".</p>
                 )}
-                 {filteredMembers.length === 0 && !searchTerm && (
-                     <p className="text-sm text-gray-500 text-center py-4">This classroom has no members yet.</p>
-                 )}
+                {filteredMembers.length === 0 && !searchTerm && (
+                    <p className="text-sm text-gray-500 text-center py-4">This classroom has no members yet.</p>
+                )}
 
                 <ul className="space-y-3">
                     {paginatedMembers.map(member => (
@@ -175,7 +176,7 @@ export const ClassroomMembersSection: React.FC<{
                             disabled={currentPage === 1}
                             className="px-3 py-1.5 border border-[#DBE2EF] rounded-md hover:bg-[#DBE2EF] text-[#3F72AF] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                         >
-                           <FaChevronLeft className="mr-1 h-3 w-3"/> Previous
+                            <FaChevronLeft className="mr-1 h-3 w-3" /> Previous
                         </button>
                         <span className="text-gray-600">
                             Page {currentPage} of {totalPages}
@@ -185,7 +186,7 @@ export const ClassroomMembersSection: React.FC<{
                             disabled={currentPage === totalPages}
                             className="px-3 py-1.5 border border-[#DBE2EF] rounded-md hover:bg-[#DBE2EF] text-[#3F72AF] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                         >
-                            Next <FaChevronRight className="ml-1 h-3 w-3"/>
+                            Next <FaChevronRight className="ml-1 h-3 w-3" />
                         </button>
                     </div>
                 )}
@@ -195,20 +196,22 @@ export const ClassroomMembersSection: React.FC<{
             <AddMemberModal
                 isOpen={showAddTeacherModal}
                 onClose={() => setShowAddTeacherModal(false)}
-                onAddMember={(userId) => handleAddMember(userId, 'Teacher')}
+                onAddMember={(userId) => handlePerformAddMember(userId, 'Teacher')}
                 roleToAdd="Teacher"
-                isLoading={isAddingMember}
-                error={addMemberError}
-                clearError={() => setAddMemberError(null)}
+                classroomId={details.id} // <-- Pass classroomId
+                isAddingMemberLoading={isAddingMember}
+                addMemberError={addMemberError}
+                clearAddMemberError={() => setAddMemberError(null)}
             />
             <AddMemberModal
                 isOpen={showAddStudentModal}
                 onClose={() => setShowAddStudentModal(false)}
-                onAddMember={(userId) => handleAddMember(userId, 'Student')}
+                onAddMember={(userId) => handlePerformAddMember(userId, 'Student')}
                 roleToAdd="Student"
-                isLoading={isAddingMember}
-                error={addMemberError}
-                clearError={() => setAddMemberError(null)}
+                classroomId={details.id} // <-- Pass classroomId
+                isAddingMemberLoading={isAddingMember}
+                addMemberError={addMemberError}
+                clearAddMemberError={() => setAddMemberError(null)}
             />
         </>
     );

@@ -1,6 +1,6 @@
 // src/services/classroomService.ts
 import api from './api';
-import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload} from '../types/classroom.ts'; // Define these types next
+import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload, UserSearchResultDto} from '../types/classroom.ts'; // Define these types next
 
 export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   try {
@@ -95,5 +95,27 @@ export const deleteClassroom = async (classroomId: string | number): Promise<voi
         await api.delete(`/api/classrooms/${classroomId}`);
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to delete classroom');
+    }
+};
+
+export const searchPotentialMembers = async (
+    classroomId: string | number,
+    searchTerm: string,
+    limit: number = 5
+): Promise<UserSearchResultDto[]> => {
+    if (!searchTerm || searchTerm.trim().length < 2) { // Basic client-side check
+        return Promise.resolve([]); // Don't search for very short terms
+    }
+    try {
+        const response = await api.get<UserSearchResultDto[]>(
+            `/api/classrooms/${classroomId}/potential-members/search`,
+            {
+                params: { searchTerm, limit }
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        console.error("Search Potential Members Error:", error.response?.data || error.message);
+        throw error.response?.data || new Error('Failed to search for users.');
     }
 };
