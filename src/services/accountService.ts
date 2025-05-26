@@ -1,7 +1,9 @@
 import api from './api';
 import { ChangeUsernamePayload, ChangePasswordPayload } from '../types/account';
+import { UserProfileDto } from '../types/auth';
 
 const API_BASE_PATH = '/api/auth/account';
+const PHOTO_API_BASE_PATH = '/api/user/profile/photo';
 
 export const changeUsername = async (payload: ChangeUsernamePayload): Promise<void> => {
     try {
@@ -32,5 +34,30 @@ export const changePassword = async (payload: ChangePasswordPayload): Promise<vo
         }
 
         throw new Error(errorMessage);
+    }
+};
+
+export const uploadProfilePhoto = async (photoFile: File): Promise<UserProfileDto> => {
+    const formData = new FormData();
+    formData.append('photoFile', photoFile); // Key must match backend parameter name
+
+    try {
+        const response = await api.post<UserProfileDto>(PHOTO_API_BASE_PATH, formData, {
+            headers: {
+                'Content-Type': undefined, // Let Axios set for FormData
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.detail || error.response?.data?.message || 'Failed to upload profile photo.');
+    }
+};
+
+
+export const deleteProfilePhoto = async (): Promise<void> => {
+    try {
+        await api.delete(PHOTO_API_BASE_PATH);
+    } catch (error: any) {
+        throw new Error(error.response?.data?.detail || error.response?.data?.message || 'Failed to delete profile photo.');
     }
 };

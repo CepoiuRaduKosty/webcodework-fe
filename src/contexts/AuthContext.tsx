@@ -17,6 +17,7 @@ interface AuthContextType extends AuthState {
   login: (credentials: LoginPayload) => Promise<void>;
   logout: () => void;
   clearError: () => void;
+  updateUserProfilePhoto: (newPhotoUrl: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,7 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (expirationDate > new Date()) {
           setAuthState({
             isAuthenticated: true,
-            user: { username: parsedData.username },
+            user: { username: parsedData.username, profilePhotoUrl: parsedData.profilePhotoUrl },
             token: parsedData.token,
             tokenExpiration: expirationDate,
             isLoading: false,
@@ -83,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       setAuthState({
         isAuthenticated: true,
-        user: { username: data.username },
+        user: { username: data.username, profilePhotoUrl: data.profilePhotoUrl },
         token: data.token,
         tokenExpiration: expirationDate,
         isLoading: false,
@@ -141,8 +142,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
+  const updateUserProfilePhoto = useCallback((newPhotoUrl: string | null) => {
+    setAuthState(prev => {
+        if (prev.user) {
+            const updatedUser = { ...prev.user, profilePhotoUrl: newPhotoUrl };
+            const currentAuthDataString = localStorage.getItem(AUTH_TOKEN_KEY);
+            if (currentAuthDataString) {
+                try {
+                    const currentAuthData: AuthResponse = JSON.parse(currentAuthDataString);
+                    const updatedAuthData = { ...currentAuthData, profilePhotoUrl: newPhotoUrl, username: updatedUser.username }; // ensure username is also up-to-date
+                    localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify(updatedAuthData));
+                } catch (e) { console.error("Failed to update auth data in localStorage", e); }
+            }
+            return { ...prev, user: updatedUser };
+        }
+        return prev;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ ...authState, login, logout, clearError }}>
+    <AuthContext.Provider value={{ ...authState, login, logout, clearError, updateUserProfilePhoto }}>
       {/* Don't render children until loading check is complete */}
       {authState.isLoading ? (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F9F7F7]"> {/* Palette: Page Background */}
