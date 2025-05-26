@@ -30,6 +30,7 @@ export interface ClassroomMemberDto {
     role: ClassroomRole;
     joinedAt: string; // ISO date string
     classroomId?: number; // Include if needed/returned
+    profilePhotoUrl?: string | null;
 }
 
 // Expected response from GET /api/classrooms/{classroomId}/details
