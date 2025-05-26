@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as classroomService from '../services/classroomService';
 import { UserClassroomDto, CreateClassroomPayload, ClassroomRole } from '../types/classroom';
-import { FaChalkboardTeacher, FaPlus, FaTimes, FaInfoCircle } from 'react-icons/fa'; // Example icons
+import { FaChalkboardTeacher, FaPlus, FaTimes, FaInfoCircle, FaCog } from 'react-icons/fa'; // Example icons
 
 const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -104,6 +104,13 @@ const DashboardPage: React.FC = () => {
                 Welcome, <span className="font-semibold text-[#112D4E]">{user.username}</span>!
               </p>
             )}
+            <Link
+              to="/settings"
+              title="Account Settings"
+              className="p-2 text-[#3F72AF] hover:text-[#112D4E] hover:bg-[#DBE2EF] rounded-full transition-colors duration-200"
+            >
+              <FaCog size={20} />
+            </Link>
             <button
               onClick={logout}
               className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-[#F9F7F7] transition-colors duration-300"

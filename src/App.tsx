@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRou
 import ClassroomPage from './pages/ClassroomPage'; // Import the new page
 import AssignmentPage from './pages/AssignmentPage';
 import AssignmentManagePage from './pages/AssignmentManagePage';
+import SettingsPage from './pages/SettingsPage';
 
 // A simple component to handle root redirection logic
 const RootRedirect: React.FC = () => {
@@ -38,7 +39,7 @@ function App() {
                 <Route path="classrooms/:classroomId" element={<ClassroomPage />} /> {/* Add classroom route */}
                 <Route path="assignments/:assignmentId" element={<AssignmentPage />} /> 
                 <Route path="assignments/:assignmentId/manage" element={<AssignmentManagePage />} />
-                {/* Add other protected routes here */}
+                <Route path="settings" element={<SettingsPage />} />
                 <Route index element={<RootRedirect />} /> {/* Handle root redirect within protected routes */}
            </Route>
 
