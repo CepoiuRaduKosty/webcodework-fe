@@ -54,3 +54,8 @@ export interface ClassroomPhotoUploadResponseDto {
     createdAt: string;
     photoUrl?: string | null;
 }
+
+export interface UpdateClassroomPayload {
+    name: string;
+    description?: string | null; // Allow clearing description
+}

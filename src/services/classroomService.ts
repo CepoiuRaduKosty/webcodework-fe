@@ -1,6 +1,6 @@
 // src/services/classroomService.ts
 import api from './api';
-import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto} from '../types/classroom.ts'; // Define these types next
+import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload} from '../types/classroom.ts'; // Define these types next
 
 export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   try {
@@ -70,5 +70,30 @@ export const deleteClassroomPhoto = async (classroomId: string | number): Promis
         await api.delete(`/api/classrooms/${classroomId}/photo`);
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to delete classroom photo');
+    }
+};
+
+export const updateClassroomDetails = async (
+    classroomId: string | number,
+    payload: UpdateClassroomPayload
+): Promise<ClassroomDetailsDto> => { // Assuming backend returns full details or ClassroomDto
+    try {
+        const response = await api.put<ClassroomDetailsDto>(`/api/classrooms/${classroomId}`, payload);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.errors?.Name?.join(', ') || // For ValidationProblemDetails
+                             error.response?.data?.errors?.Description?.join(', ') ||
+                             error.response?.data?.message ||
+                             error.message ||
+                             'Failed to update classroom details.';
+        throw new Error(errorMessage);
+    }
+};
+
+export const deleteClassroom = async (classroomId: string | number): Promise<void> => {
+    try {
+        await api.delete(`/api/classrooms/${classroomId}`);
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to delete classroom');
     }
 };
