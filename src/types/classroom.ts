@@ -14,6 +14,7 @@ export interface UserClassroomDto {
   description?: string;
   userRole: ClassroomRole; // User's role in this specific classroom
   joinedAt: string; // ISO date string
+  photoUrl?: string | null;
 }
 
 // Payload for creating a classroom
@@ -38,9 +39,18 @@ export interface ClassroomDetailsDto {
     description?: string;
     currentUserRole: ClassroomRole; // Role of the user making the request
     members: ClassroomMemberDto[];
+    photoUrl?: string | null;
 }
 
 // Payload for adding teacher/student
 export interface AddMemberPayload {
     userId: number;
+}
+
+export interface ClassroomPhotoUploadResponseDto {
+    id: number;
+    name: string;
+    description?: string | null;
+    createdAt: string;
+    photoUrl?: string | null;
 }

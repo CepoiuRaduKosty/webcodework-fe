@@ -1,6 +1,6 @@
 // src/services/classroomService.ts
 import api from './api';
-import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole} from '../types/classroom.ts'; // Define these types next
+import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto} from '../types/classroom.ts'; // Define these types next
 
 export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   try {
@@ -46,5 +46,29 @@ export const addStudent = async (classroomId: string | number, payload: AddMembe
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to add student');
+    }
+};
+
+export const uploadClassroomPhoto = async (classroomId: string | number, photoFile: File): Promise<ClassroomPhotoUploadResponseDto> => {
+    const formData = new FormData();
+    formData.append('photoFile', photoFile);
+
+    try {
+        const response = await api.post<ClassroomPhotoUploadResponseDto>(`/api/classrooms/${classroomId}/photo`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to upload classroom photo');
+    }
+};
+
+export const deleteClassroomPhoto = async (classroomId: string | number): Promise<void> => {
+    try {
+        await api.delete(`/api/classrooms/${classroomId}/photo`);
+    } catch (error: any) {
+        throw error.response?.data || new Error('Failed to delete classroom photo');
     }
 };
