@@ -38,23 +38,26 @@ export interface SubmittedFileDto {
     uploadedAt: string; // ISO date string
 }
 
-// Matches backend DTO: SubmissionDto
 export interface SubmissionDto {
     id: number;
     assignmentId: number;
     studentId: number;
     studentUsername: string;
-    submittedAt?: string | null; // ISO date string
+    submittedAt?: string | null;
     isLate: boolean;
     grade?: number | null;
     feedback?: string | null;
-    gradedAt?: string | null; // ISO date string
+    gradedAt?: string | null;
     gradedById?: number | null;
     gradedByUsername?: string | null;
     submittedFiles: SubmittedFileDto[];
+    lastEvaluationPointsObtained?: number | null;
+    lastEvaluationTotalPossiblePoints?: number | null;
+    lastEvaluationAt?: Date | null;
+    lastEvaluationOverallStatus?: string | null;
+    lastEvaluationDetailsJson?: string | null;
 }
 
-// Matches backend DTO: GradeSubmissionDto (For future use)
 export interface GradeSubmissionDto {
   grade?: number | null;
   feedback?: string | null;
@@ -73,4 +76,11 @@ export interface TeacherSubmissionViewDto {
 
 export interface CreateVirtualFilePayload {
     fileName: string;
+}
+
+export interface UpdateAssignmentPayload {
+    title: string;
+    instructions?: string | null;
+    dueDate?: string | null;
+    maxPoints?: number | null;
 }

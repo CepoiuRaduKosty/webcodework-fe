@@ -7,6 +7,7 @@ import {
     SubmissionDto,
     SubmittedFileDto,
     CreateVirtualFilePayload,
+    UpdateAssignmentPayload,
 } from '../types/assignment.ts'; // We'll define these types next
 import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
@@ -137,3 +138,28 @@ export const createVirtualFile = async (assignmentId: string | number, fileName:
          throw error.response?.data || new Error(`Failed to create file '${fileName}'`);
     }
 };
+
+export const updateAssignment = async (
+    assignmentId: string | number,
+    payload: UpdateAssignmentPayload
+): Promise<AssignmentDetailsDto> => { // Assuming backend returns full details
+    try {
+        const response = await api.put<AssignmentDetailsDto>(`/api/assignments/${assignmentId}`, payload);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.errors?.Title?.join(', ') ||
+                             error.response?.data?.message ||
+                             error.message ||
+                             'Failed to update assignment.';
+        throw new Error(errorMessage);
+    }
+};
+
+export const deleteAssignment = async (assignmentId: string | number): Promise<void> => {
+    try {
+        await api.delete(`/api/assignments/${assignmentId}`);
+    } catch (error: any) {
+        throw error.response?.data?.message || error.message || 'Failed to delete assignment.';
+    }
+};
+

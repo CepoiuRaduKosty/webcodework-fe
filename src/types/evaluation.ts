@@ -22,6 +22,9 @@ export interface FrontendTestCaseResultDto {
     stderr?: string | null;
     message?: string | null;
     durationMs?: number | null;
+    testCaseName?: string | null;
+    isPrivate?: boolean | null;
+    maximumMemoryException?: boolean | null;
 }
 
 // Corresponds to OrchestrationEvaluateResponse from main backend

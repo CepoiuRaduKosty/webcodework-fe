@@ -5,13 +5,15 @@ import * as assignmentService from '../services/assignmentService';
 import { AssignmentDetailsDto } from '../types/assignment';
 import { AssignmentTopElement } from '../components/AssignmentTopElement';
 import { AssignmentStudentWork } from '../components/AssignmentStudentWork';
+import { useAuth } from '../contexts/AuthContext';
+import { ClassroomRole } from '../types/classroom';
 
 const AssignmentPage: React.FC = () => {
     const { assignmentId } = useParams<{ assignmentId: string }>();
     const [assignmentDetails, setAssignmentDetails] = useState<AssignmentDetailsDto | null>(null);
     const [isLoadingAssignment, setIsLoadingAssignment] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
+    const { user } = useAuth();
 
     // Fetch Assignment Details Callback
     const fetchAssignmentData = useCallback(async () => {
@@ -35,17 +37,27 @@ const AssignmentPage: React.FC = () => {
     // --- Render Logic ---
     if (isLoadingAssignment) return <div className="container mx-auto mt-10 p-6 text-center">Loading assignment data...</div>;
     if (error) return <div className="container mx-auto mt-10 p-6 text-center text-red-600">Error: {error}</div>;
-    if (!assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center">Assignment not found.</div>;
+    if (!assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center">Loading assignment details...</div>;
 
     const isStudentView = true; // Placeholder - ideally, confirm role
 
     return (
-        <div className="container mx-auto mt-6 md:mt-10 p-4 md:p-0">
-            <div className="mb-4 px-4 md:px-0">
-                <Link to={`/classrooms/${assignmentDetails.classroomId}`} className="text-sm text-blue-600 hover:underline">&larr; Back to Classroom</Link>
+        <div className="min-h-screen bg-[#F9F7F7] text-[#112D4E]">
+            <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+                <div className="mb-4 px-4 md:px-0">
+                    <Link to={`/classrooms/${assignmentDetails.classroomId}`} className="text-sm text-[#3F72AF] hover:text-[#112D4E] hover:underline">
+                        &larr; Back to Classroom
+                    </Link>
+                </div>
+                <AssignmentTopElement
+                    assignmentDetails={assignmentDetails}
+                    currentUserId={user?.id}
+                    currentUserClassroomRole={ClassroomRole.Student}
+                    onAssignmentUpdated={fetchAssignmentData}
+                    onAssignmentDeleted={fetchAssignmentData}
+                />
+                {isStudentView && <AssignmentStudentWork assignmentId={assignmentId} assignmentDetails={assignmentDetails} />}
             </div>
-            <AssignmentTopElement assignmentDetails={assignmentDetails}/>
-            {isStudentView && <AssignmentStudentWork assignmentId={assignmentId} assignmentDetails={assignmentDetails}/>}
         </div>
     );
 };

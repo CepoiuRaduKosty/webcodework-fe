@@ -7,6 +7,7 @@ import { Editor } from "@monaco-editor/react";
 import { AssignmentEvaluationResult } from "./AssignmentEvaluationResult";
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { SUPPORTED_LANGUAGES, SOLUTION_FILENAME } from "../config/languages"
+import { FaCode, FaExclamationCircle, FaPlay, FaSave, FaSpinner, FaTimes } from "react-icons/fa";
 
 export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefined, mySubmission: SubmissionDto | null, callbackRefreshSubmittedFiles: () => Promise<void> }> = ({ assignmentId, mySubmission, callbackRefreshSubmittedFiles }) => {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -16,6 +17,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     const [isEditorLoading, setIsEditorLoading] = useState(false);
     const [editorError, setEditorError] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [evaluationStatusMessage, setEvaluationStatusMessage] = useState<string | null>(null);
 
     const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
     const [evaluationResult, setEvaluationResult] = useState<FrontendEvaluateResponseDto | null>(null);
@@ -180,19 +182,24 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
 
     const monacoLanguage = SUPPORTED_LANGUAGES.find(lang => lang.value === selectedLanguage)?.monacoLang || "plaintext";
 
-    return <>
-        <div className="my-4 p-4 border rounded bg-blue-50">
-            {!isEditorOpen && !isEvaluating && ( // Show only when editor is closed and not evaluating
-                <div className="mb-3">
-                    <label htmlFor="languageSelect" className="block text-sm font-medium text-slate-700 mb-1">
+    return (
+        <div className="my-6 p-6 bg-[#F9F7F7] border border-[#DBE2EF] rounded-xl shadow-lg text-[#112D4E]">
+            <h3 className="text-xl font-semibold mb-4 text-[#112D4E] flex items-center">
+                <FaCode className="mr-3 text-[#3F72AF]" /> Online Editor for '{SOLUTION_FILENAME}'
+            </h3>
+
+            {/* Language Dropdown - only show if editor not open and not evaluating */}
+            {!isEditorOpen && !isEvaluating && (
+                <div className="mb-4">
+                    <label htmlFor="languageSelect" className="block text-sm font-medium text-[#112D4E] mb-1">
                         Select Language for Editor & Evaluation:
                     </label>
                     <select
                         id="languageSelect"
                         value={selectedLanguage}
                         onChange={(e) => setSelectedLanguage(e.target.value)}
-                        disabled={isEditorOpen || isEvaluating}
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
+                        disabled={isEditorOpen || isEvaluating} // Also disable if evaluating
+                        className="mt-1 block w-full sm:w-auto pl-3 pr-10 py-2.5 text-base border-[#DBE2EF] bg-white text-[#112D4E] focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] sm:text-sm rounded-md shadow-sm"
                     >
                         {SUPPORTED_LANGUAGES.map(lang => (
                             <option key={lang.value} value={lang.value}>
@@ -202,76 +209,106 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                     </select>
                 </div>
             )}
-            {!isEditorOpen && editorError && <p className="text-sm text-red-600 mb-2">{editorError}</p>}
+
+            {/* Editor specific error (e.g. failed to create file), shown when editor is closed */}
+            {!isEditorOpen && editorError && (
+                <p className="p-3 text-sm text-red-700 bg-red-100 border border-red-200 rounded-md mb-3 flex items-center">
+                    <FaExclamationCircle className="mr-2"/> {editorError}
+                </p>
+            )}
+
+            {/* Buttons to Open Editor / Evaluate - shown when editor is closed */}
             {!isEditorOpen && (
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
                     <button
                         onClick={handleOpenEditor}
-                        disabled={isEditorLoading}
-                        className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isEditorLoading ? 'bg-gray-400 cursor-wait' : 'bg-slate-700 hover:bg-slate-800 focus:ring-slate-500'}`}
+                        disabled={isEditorLoading || isEvaluating}
+                        className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#F9F7F7] transition-colors duration-150 flex items-center justify-center
+                                    ${isEditorLoading || isEvaluating ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#112D4E] hover:bg-opacity-80 focus:ring-[#112D4E]'}`}
                     >
-                        {isEditorLoading ? 'Loading Editor...' : (solutionFileExists ? 'Edit solution' : 'Start solution')}
+                        {isEditorLoading ? <FaSpinner className="animate-spin mr-2"/> : <FaCode className="mr-2"/>}
+                        {isEditorLoading ? 'Loading...' : (solutionFileExists ? `Edit ${SOLUTION_FILENAME}` : `Start ${SOLUTION_FILENAME}`)}
                     </button>
-                    {solutionFileExists && !mySubmission?.submittedAt && (
+
+                    {solutionFileExists && !mySubmission?.submittedAt && ( // Condition to show Evaluate button
                         <button
                             onClick={handleEvaluateSolution}
-                            disabled={isEvaluating || isEditorOpen || !hubConnection || !isHubConnected }
-                            title={isEditorOpen ? "Close editor to evaluate" : !hubConnection || !isHubConnected ? "Evaluation service not connected" : "Evaluate your solution"}
-                            className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 ${isEvaluating ? 'bg-orange-300 cursor-wait animate-pulse' : 'bg-orange-500 hover:bg-orange-600 focus:ring-orange-400'} ${isEditorOpen ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={isEvaluating || isEditorOpen || !isHubConnected}
+                            title={isEditorOpen ? "Close editor to evaluate" : !isHubConnected ? "Evaluation service not connected" : `Evaluate your ${SOLUTION_FILENAME} as ${selectedLanguage.toUpperCase()}`}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#F9F7F7] transition-colors duration-150 flex items-center justify-center
+                                        ${isEvaluating ? 'bg-[#3F72AF] cursor-wait' : 'bg-[#3F72AF] hover:bg-[#3F72AF] focus:ring-[#3F72AF]'}
+                                        ${(isEditorOpen || !isHubConnected) ? 'opacity-60 cursor-not-allowed' : ''}`}
                         >
-                            {isEvaluating ? 'Evaluating...' : 'Evaluate Solution'}
+                            {isEvaluating ? <FaSpinner className="animate-spin mr-2"/> : <FaPlay className="mr-2"/>}
+                            {isEvaluating ? 'Evaluating...' : `Evaluate (${selectedLanguage.toUpperCase()})`}
                         </button>
                     )}
                 </div>
             )}
+
+            {/* Editor UI - shown when editor is open */}
             {isEditorOpen && (
-                <div className="mt-4 mb-6 border rounded shadow-md overflow-hidden">
-                    {/* Editor Header / Status Bar */}
-                    <div className="flex justify-between items-center p-2 border-b bg-gray-100 text-xs">
-                        <span className="font-semibold text-gray-700">Editing: {editingFile?.fileName ?? 'solution'}</span>
-                        {/* Save Status & Action Buttons */}
+                <div className="my-4 border border-[#DBE2EF] rounded-lg shadow-md overflow-hidden bg-white">
+                    <div className="flex justify-between items-center p-2.5 border-b border-[#DBE2EF] bg-[#F9F7F7] text-xs">
+                        <span className="font-semibold text-[#112D4E]">
+                            Editing: {editingFile?.fileName ?? SOLUTION_FILENAME} (Language: {monacoLanguage.toUpperCase()})
+                        </span>
                         <div className="flex items-center space-x-2">
-                            {saveStatus === 'saving' && <span className="text-blue-600 animate-pulse">Saving...</span>}
-                            {saveStatus === 'saved' && <span className="text-green-600">Saved!</span>}
-                            {saveStatus === 'error' && <span className="text-red-600">Save Error!</span>}
+                            {saveStatus === 'saving' && <span className="text-[#3F72AF] animate-pulse font-medium">Saving...</span>}
+                            {saveStatus === 'saved' && <span className="text-green-600 font-medium">Saved!</span>}
+                            {saveStatus === 'error' && <span className="text-red-600 font-medium">Save Error!</span>}
                             <button
                                 onClick={handleSaveContent}
                                 disabled={isSaving || saveStatus === 'saving'}
-                                className={`px-3 py-1 text-xs font-medium text-white rounded focus:outline-none ${isSaving || saveStatus === 'saving' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                className={`px-3 py-1.5 text-xs font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-[#F9F7F7] transition-colors
+                                            ${isSaving || saveStatus === 'saving' ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#3F72AF] hover:bg-[#112D4E] focus:ring-[#3F72AF]'}`}
                             >
-                                {isSaving || saveStatus === 'saving' ? 'Saving...' : 'Save Code'}
+                                <FaSave className="inline mr-1"/> {isSaving || saveStatus === 'saving' ? 'Saving...' : 'Save Code'}
                             </button>
                             <button
                                 onClick={handleCloseEditor}
-                                className="px-3 py-1 text-xs font-medium text-white bg-gray-500 rounded hover:bg-gray-600 focus:outline-none"
+                                className="px-3 py-1.5 text-xs font-medium text-[#112D4E] bg-[#DBE2EF] rounded-md hover:bg-opacity-80 hover:text-[#112D4E] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-[#F9F7F7] focus:ring-gray-500 transition-colors"
                             >
-                                Close Editor
+                                <FaTimes className="inline mr-1"/> Close Editor
                             </button>
                         </div>
                     </div>
-                    {editorError && !isEditorLoading && <p className="p-2 text-sm text-red-600 bg-red-50">{editorError}</p>}
-                    {isEditorLoading && <div className="p-4 text-center text-gray-500">Loading editor content...</div>}
+                    {/* Error inside editor view (e.g., save error) */}
+                    {editorError && saveStatus === 'error' && <p className="p-3 text-sm text-red-700 bg-red-100 border-b border-red-200">{editorError}</p>}
+                    
+                    {isEditorLoading && <div className="p-10 text-center text-gray-500">Loading editor content...</div>}
                     {!isEditorLoading && (
                         <Editor
-                            // Set a suitable height for inline display
-                            height="60vh" // Example: 60% of viewport height
+                            height="60vh"
                             language={monacoLanguage}
-                            theme="vs-dark"
+                            theme="vs-dark" // Standard dark theme for Monaco, usually looks good
                             value={editorContent}
                             onChange={handleEditorChange}
                             options={{
-                                minimap: { enabled: true }, // Maybe enable minimap now?
+                                minimap: { enabled: true },
                                 fontSize: 14,
                                 scrollBeyondLastLine: false,
                                 automaticLayout: true,
+                                wordWrap: "on", // Good for instructions if used here
+                                readOnly: isSaving || saveStatus === 'saving', // Prevent editing while saving
                             }}
                         />
                     )}
                 </div>
             )}
-            {(isEvaluating || evaluationError || evaluationResult) && (
-                <AssignmentEvaluationResult isEvaluating={isEvaluating} evaluationResult={evaluationResult} evaluationError={evaluationError} />
+
+            {/* Evaluation Status & Results (delegated to AssignmentEvaluationResult) */}
+            {(isEvaluating || evaluationStatusMessage || evaluationError || evaluationResult) && (
+                 <div className="mt-6 pt-6 border-t border-[#DBE2EF]">
+                     {evaluationStatusMessage && !evaluationResult && !evaluationError && (
+                        <div className={`flex items-center p-3 rounded-md mb-3 text-sm ${isEvaluating ? 'bg-blue-50 text-[#3F72AF] border border-blue-200' : 'bg-gray-100 text-gray-700'}`}>
+                           {isEvaluating && ( <FaSpinner className="animate-spin mr-3 h-5 w-5 "/> )}
+                            {evaluationStatusMessage}
+                        </div>
+                    )}
+                    <AssignmentEvaluationResult isEvaluating={isEvaluating && !evaluationResult && !evaluationError} evaluationResult={evaluationResult} evaluationError={evaluationError} />
+                </div>
             )}
         </div>
-    </>
+    )
 }
