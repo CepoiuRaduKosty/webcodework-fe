@@ -85,3 +85,15 @@ export const deleteTestCase = async (assignmentId: string | number, testCaseId: 
         throw error.response?.data || new Error('Failed to delete test case');
     }
 };
+
+export const updateTestCasePrivacy = async (
+    testCaseId: string | number,
+    isPrivate: boolean
+): Promise<void> => {
+    try {
+        await api.patch(`/api/testcases/${testCaseId}/privacy`, { isPrivate });
+    } catch (error: any) {
+        console.error("Update Test Case Privacy Error:", error.response?.data || error.message);
+        throw error.response?.data || new Error('Failed to update test case privacy.');
+    }
+};

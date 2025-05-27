@@ -7,6 +7,7 @@ import { AssignmentTopElement } from '../components/AssignmentTopElement';
 import { AssignmentStudentWork } from '../components/AssignmentStudentWork';
 import { useAuth } from '../contexts/AuthContext';
 import { ClassroomRole } from '../types/classroom';
+import { TestCasesSection } from '../components/TestCasesSection';
 
 const AssignmentPage: React.FC = () => {
     const { assignmentId } = useParams<{ assignmentId: string }>();
@@ -56,6 +57,7 @@ const AssignmentPage: React.FC = () => {
                     onAssignmentUpdated={fetchAssignmentData}
                     onAssignmentDeleted={fetchAssignmentData}
                 />
+                {assignmentDetails.isCodeAssignment && <TestCasesSection assignmentDetails={assignmentDetails} isEditable={false} />}
                 {isStudentView && <AssignmentStudentWork assignmentId={assignmentId} assignmentDetails={assignmentDetails} />}
             </div>
         </div>

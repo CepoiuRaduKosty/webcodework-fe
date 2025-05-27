@@ -1,5 +1,6 @@
 // src/types/testcase.ts
 export interface TestCaseListDto {
+    testCaseName: string;
     id: number;
     inputFileName: string;
     expectedOutputFileName: string;
@@ -8,6 +9,7 @@ export interface TestCaseListDto {
     points: number;
     maxExecutionTimeMs: number;
     maxRamMB: number;
+    isPrivate: boolean;
 }
 
 export interface TestCaseDetailDto extends TestCaseListDto {

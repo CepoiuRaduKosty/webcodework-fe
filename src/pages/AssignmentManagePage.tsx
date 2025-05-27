@@ -87,7 +87,7 @@ const AssignmentManagePage: React.FC = () => {
                         <GradeDistributionChart submissions={submissions} assignmentDetails={assignmentDetails} />
                     </div>
                 )}
-                <TestCasesSection assignmentDetails={assignmentDetails} />
+                {assignmentDetails.isCodeAssignment && <TestCasesSection assignmentDetails={assignmentDetails} isEditable={true} />}
                 <TeacherViewSubmissionsTable assignmentDetails={assignmentDetails} submissions={submissions} isLoadingSubmissions={isLoadingSubmissions} fetchSubmissionsError={error} refreshSubmissions={fetchPageData}/>
             </div>
         </div>
