@@ -1,16 +1,17 @@
 // src/components/ClassroomMembersSection.tsx
 import React, { useState, useMemo, useEffect } from 'react';
-import { ClassroomDetailsDto, ClassroomRole } from "../types/classroom";
+import { ClassroomDetailsDto, ClassroomMemberDto, ClassroomRole } from "../types/classroom";
 import * as classroomService from '../services/classroomService';
 import { AddMemberModal } from './modals/AddMemberModal';
-import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaChevronLeft, FaChevronRight, FaPlus, FaSpinner, FaUserTimes } from 'react-icons/fa';
 
 const ITEMS_PER_PAGE = 5;
 
 export const ClassroomMembersSection: React.FC<{
     details: ClassroomDetailsDto,
-    refreshClassroomData: () => Promise<void>
-}> = ({ details, refreshClassroomData }) => {
+    refreshClassroomData: () => Promise<void>,
+    loggedInUserId?: number;
+}> = ({ details, refreshClassroomData, loggedInUserId }) => {
     const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
     const [showAddStudentModal, setShowAddStudentModal] = useState(false);
     const [isAddingMember, setIsAddingMember] = useState(false);
@@ -18,6 +19,9 @@ export const ClassroomMembersSection: React.FC<{
 
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+
+    const [removingMemberId, setRemovingMemberId] = useState<number | null>(null);
+    const [removeMemberError, setRemoveMemberError] = useState<string | null>(null);
 
     const handlePerformAddMember = async (userIdNum: number, roleToAdd: 'Teacher' | 'Student') => {
         if (!details.id) {
@@ -100,6 +104,54 @@ export const ClassroomMembersSection: React.FC<{
         return <span className={styles}>{roleName}</span>;
     };
 
+    const handleRemoveMember = async (memberToRemove: ClassroomMemberDto) => {
+        if (!details.id || !loggedInUserId) return; // Should not happen if button is shown
+
+        // Prevent removing self with this button (user should use "Leave Classroom")
+        if (memberToRemove.userId === loggedInUserId) {
+            alert("To leave the classroom, please use the 'Leave Classroom' option.");
+            return;
+        }
+
+        // Prevent removing owner with this button
+        if (memberToRemove.role === ClassroomRole.Owner) {
+            alert("Classroom owners cannot be removed this way. Ownership must be transferred or the classroom deleted by the owner.");
+            return;
+        }
+
+        if (!window.confirm(`Are you sure you want to remove ${memberToRemove.username} from this classroom?`)) {
+            return;
+        }
+
+        setRemovingMemberId(memberToRemove.userId);
+        setRemoveMemberError(null);
+        try {
+            await classroomService.removeMemberFromClassroom(details.id, memberToRemove.userId);
+            await refreshClassroomData(); // Refresh the member list
+            // TODO: Add success toast
+        } catch (err: any) {
+            setRemoveMemberError(err.message || "Failed to remove member.");
+            // Optionally display this error more prominently
+            alert(`Error removing member: ${err.message}`);
+        } finally {
+            setRemovingMemberId(null);
+        }
+    };
+
+    // --- Function to determine if current user can remove a specific member ---
+    const canCurrentUserRemoveMember = (memberToRemove: ClassroomMemberDto): boolean => {
+        if (!loggedInUserId || loggedInUserId === memberToRemove.userId || memberToRemove.role === ClassroomRole.Owner) {
+            return false; // Cannot remove self or an owner via this button
+        }
+        if (details.currentUserRole === ClassroomRole.Owner) {
+            return memberToRemove.role === ClassroomRole.Teacher || memberToRemove.role === ClassroomRole.Student;
+        }
+        if (details.currentUserRole === ClassroomRole.Teacher) {
+            return memberToRemove.role === ClassroomRole.Student;
+        }
+        return false;
+    };
+
     return (
         <>
             <div className="lg:col-span-1 bg-white p-4 md:p-6 shadow-xl rounded-2xl text-[#112D4E]">
@@ -146,26 +198,46 @@ export const ClassroomMembersSection: React.FC<{
                 {filteredMembers.length === 0 && !searchTerm && (
                     <p className="text-sm text-gray-500 text-center py-4">This classroom has no members yet.</p>
                 )}
+                {removeMemberError && <p className="text-sm text-red-600 mb-3 p-2 bg-red-50 rounded border border-red-200">{removeMemberError}</p>}
 
                 <ul className="space-y-3">
-                    {paginatedMembers.map(member => (
-                        <li key={member.userId} className="flex items-center space-x-3 p-3 bg-[#F9F7F7] border border-[#DBE2EF] rounded-md hover:shadow-md transition-shadow">
-                            {member.profilePhotoUrl ? (
-                                <img src={member.profilePhotoUrl} alt={member.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
-                            ) : (
-                                <div className="w-10 h-10 rounded-full bg-[#DBE2EF] flex items-center justify-center text-[#3F72AF] text-lg font-semibold border-2 border-white shadow-sm">
-                                    {member.username.substring(0, 1).toUpperCase()}
+                    {paginatedMembers.map(member => {
+                        const showRemoveButton = canCurrentUserRemoveMember(member);
+                        return (
+                            <li key={member.userId} className="flex items-center space-x-3 p-3 bg-[#F9F7F7] border border-[#DBE2EF] rounded-md hover:shadow-md transition-shadow">
+                                {member.profilePhotoUrl ? (
+                                    <img src={member.profilePhotoUrl} alt={member.username} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm" />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full bg-[#DBE2EF] flex items-center justify-center text-[#3F72AF] text-lg font-semibold border-2 border-white shadow-sm">
+                                        {member.username.substring(0, 1).toUpperCase()}
+                                    </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-[#112D4E] truncate">{member.username}</p>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        Joined: {new Date(member.joinedAt).toLocaleDateString()}
+                                    </p>
                                 </div>
-                                // Or: <FaUserCircle size={40} className="text-[#DBE2EF]" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-[#112D4E] truncate">{member.username}</p>
-                                <p className="text-xs text-gray-500 truncate">Joined: {new Date(member.joinedAt).toLocaleDateString()}</p>
-                            </div>
-                            {member.role !== ClassroomRole.Student && <RoleBadge role={member.role} />}
-                            {/* TODO: Add "remove member" button for Owner/Teacher if needed */}
-                        </li>
-                    ))}
+                                {/* Role Badge on the right, then remove button */}
+                                <div className="flex items-center space-x-2 flex-shrink-0">
+                                    {member.role !== ClassroomRole.Student && <RoleBadge role={member.role} />}
+                                    {showRemoveButton && (
+                                        <button
+                                            onClick={() => handleRemoveMember(member)}
+                                            disabled={removingMemberId === member.userId}
+                                            title={`Remove ${member.username}`}
+                                            className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {removingMemberId === member.userId ?
+                                                <FaSpinner className="animate-spin h-4 w-4" /> :
+                                                <FaUserTimes className="h-4 w-4" />
+                                            }
+                                        </button>
+                                    )}
+                                </div>
+                            </li>
+                        );
+                    })}
                 </ul>
 
                 {/* Pagination Controls */}

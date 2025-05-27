@@ -1,47 +1,52 @@
-import { FormEvent, useEffect, useState } from "react";
+// src/components/modals/CreateAssignmentModal.tsx (or your actual path)
+import React, { FormEvent, useEffect, useState } from "react"; // Added React import
 import { CreateAssignmentDto } from "../../types/assignment";
-import { Modal } from "../Modal"
+import { Modal } from "../Modal"; // Assuming Modal is in ../Modal
 import { ClassroomDetailsDto } from "../../types/classroom";
 import * as assignmentService from '../../services/assignmentService';
+import { FaSpinner } from "react-icons/fa"; // For loading state on button
 
+export const CreateAssignmentModal: React.FC<{
+    details: ClassroomDetailsDto, // Classroom details to get classroomId
+    show: boolean,
+    onSuccessCallback: () => Promise<void>,
+    onCancelCallback: () => void
+}> = ({ details, show, onSuccessCallback, onCancelCallback }) => {
 
-export const CreateAssignmentModal: React.FC<{ details: ClassroomDetailsDto, show: boolean, onSuccessCallback: () => Promise<void>, onCancelCallback: () => void }> = ({ details, show, onSuccessCallback, onCancelCallback }) => {
-
-    // Create Assignment Modal State
     const [newAssignmentTitle, setNewAssignmentTitle] = useState('');
     const [newAssignmentInstructions, setNewAssignmentInstructions] = useState('');
-    const [newAssignmentDueDate, setNewAssignmentDueDate] = useState(''); // Store as string from input type="datetime-local"
-    const [newAssignmentMaxPoints, setNewAssignmentMaxPoints] = useState<string>(''); // Store as string, parse later
+    const [newAssignmentDueDate, setNewAssignmentDueDate] = useState('');
+    const [newAssignmentMaxPoints, setNewAssignmentMaxPoints] = useState<string>('');
+    const [isCodeAssignment, setIsCodeAssignment] = useState<boolean>(false);
     const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
     const [createAssignmentError, setCreateAssignmentError] = useState<string | null>(null);
-    const [isCodeAssignment, setIsCodeAssignment] = useState<boolean>(false); // <-- New state for the checkbox
 
-    // Function to reset form state
     const resetForm = () => {
         setNewAssignmentTitle('');
         setNewAssignmentInstructions('');
         setNewAssignmentDueDate('');
         setNewAssignmentMaxPoints('');
-        setIsCodeAssignment(false); // <-- Reset checkbox state
+        setIsCodeAssignment(false);
         setCreateAssignmentError(null);
-        setIsCreatingAssignment(false);
+        // setIsCreatingAssignment(false); // Keep this to avoid race condition if modal closes fast
     };
 
-    // Reset form when modal is closed/reopened (optional but good UX)
     useEffect(() => {
         if (!show) {
-            // Add a small delay to allow closing animation if modal has one
             const timer = setTimeout(() => {
                  resetForm();
-            }, 150); // Adjust delay if needed
+            }, 150); // Delay for modal close animation
              return () => clearTimeout(timer);
+        } else {
+            // Optionally reset error when modal re-opens
+            setCreateAssignmentError(null);
         }
     }, [show]);
 
     const handleCreateAssignment = async (e: FormEvent) => {
         e.preventDefault();
-        if (!details.id || !newAssignmentTitle.trim()) {
-            setCreateAssignmentError("Title is required."); return;
+        if (!details?.id || !newAssignmentTitle.trim()) {
+            setCreateAssignmentError("Classroom context missing or Title is required."); return;
         }
 
         const maxPointsNum = newAssignmentMaxPoints ? parseInt(newAssignmentMaxPoints, 10) : null;
@@ -55,7 +60,6 @@ export const CreateAssignmentModal: React.FC<{ details: ClassroomDetailsDto, sho
         const payload: CreateAssignmentDto = {
             title: newAssignmentTitle.trim(),
             instructions: newAssignmentInstructions.trim() || undefined,
-            // Convert local datetime-local string to ISO string or null
             dueDate: newAssignmentDueDate ? new Date(newAssignmentDueDate).toISOString() : null,
             maxPoints: maxPointsNum,
             isCodeAssignment: isCodeAssignment
@@ -63,14 +67,8 @@ export const CreateAssignmentModal: React.FC<{ details: ClassroomDetailsDto, sho
 
         try {
             await assignmentService.createAssignment(details.id, payload);
-            // Success
-            setNewAssignmentTitle('');
-            setNewAssignmentInstructions('');
-            setNewAssignmentDueDate('');
-            setNewAssignmentMaxPoints('');
-            setIsCodeAssignment(false);
-            await onSuccessCallback(); // Refresh assignment list
-            // TODO: Add success toast
+            // resetForm(); // Form will reset via useEffect when `show` becomes false
+            await onSuccessCallback(); // This should eventually set `show` to false
         } catch (err: any) {
             setCreateAssignmentError(err.message || 'Failed to create assignment.');
         } finally {
@@ -78,52 +76,115 @@ export const CreateAssignmentModal: React.FC<{ details: ClassroomDetailsDto, sho
         }
     };
 
-    return <>
-        <Modal isOpen={show} onClose={() => onCancelCallback()} title="Create New Assignment">
-            <form onSubmit={handleCreateAssignment}>
-                {createAssignmentError && <p className="text-sm text-red-600 mb-2">{createAssignmentError}</p>}
-                <div className="mb-3">
-                    <label htmlFor="assignmentTitle" className="block text-sm font-medium text-gray-700 mb-1">Title <span className="text-red-500">*</span></label>
-                    <input id="assignmentTitle" type="text" value={newAssignmentTitle} onChange={(e) => setNewAssignmentTitle(e.target.value)} className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+    const handleCancel = () => {
+        // resetForm(); // Let useEffect handle reset on show=false
+        onCancelCallback();
+    };
+
+    return (
+        <Modal isOpen={show} onClose={handleCancel} title="Create New Assignment"> {/* Assuming Modal itself is styled or neutral */}
+            <form onSubmit={handleCreateAssignment} className="space-y-4">
+                {createAssignmentError && (
+                    <p className="p-3 text-sm text-red-700 bg-red-100 border border-red-300 rounded-md">
+                        {createAssignmentError}
+                    </p>
+                )}
+                <div>
+                    <label htmlFor="assignmentTitle" className="block text-sm font-medium text-[#112D4E] mb-1">
+                        Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        id="assignmentTitle"
+                        type="text"
+                        value={newAssignmentTitle}
+                        onChange={(e) => setNewAssignmentTitle(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#DBE2EF] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] text-[#112D4E] placeholder-gray-400"
+                        required
+                    />
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="assignmentInstructions" className="block text-sm font-medium text-gray-700 mb-1">Instructions (Optional)</label>
-                    <textarea id="assignmentInstructions" value={newAssignmentInstructions} onChange={(e) => setNewAssignmentInstructions(e.target.value)} rows={4} className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+
+                <div>
+                    <label htmlFor="assignmentInstructions" className="block text-sm font-medium text-[#112D4E] mb-1">
+                        Instructions <span className="text-xs text-gray-500">(Optional)</span>
+                    </label>
+                    <textarea
+                        id="assignmentInstructions"
+                        value={newAssignmentInstructions}
+                        onChange={(e) => setNewAssignmentInstructions(e.target.value)}
+                        rows={4}
+                        className="w-full px-3 py-2 border border-[#DBE2EF] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] text-[#112D4E] placeholder-gray-400"
+                    />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label htmlFor="assignmentDueDate" className="block text-sm font-medium text-gray-700 mb-1">Due Date (Optional)</label>
-                        <input id="assignmentDueDate" type="datetime-local" value={newAssignmentDueDate} onChange={(e) => setNewAssignmentDueDate(e.target.value)} className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <label htmlFor="assignmentDueDate" className="block text-sm font-medium text-[#112D4E] mb-1">
+                            Due Date <span className="text-xs text-gray-500">(Optional)</span>
+                        </label>
+                        <input
+                            id="assignmentDueDate"
+                            type="datetime-local"
+                            value={newAssignmentDueDate}
+                            onChange={(e) => setNewAssignmentDueDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-[#DBE2EF] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] text-[#112D4E]"
+                        />
                     </div>
                     <div>
-                        <label htmlFor="assignmentMaxPoints" className="block text-sm font-medium text-gray-700 mb-1">Max Points (Optional)</label>
-                        <input id="assignmentMaxPoints" type="number" value={newAssignmentMaxPoints} onChange={(e) => setNewAssignmentMaxPoints(e.target.value)} min="0" step="1" className="w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <label htmlFor="assignmentMaxPoints" className="block text-sm font-medium text-[#112D4E] mb-1">
+                            Max Points <span className="text-xs text-gray-500">(Optional)</span>
+                        </label>
+                        <input
+                            id="assignmentMaxPoints"
+                            type="number"
+                            value={newAssignmentMaxPoints}
+                            onChange={(e) => setNewAssignmentMaxPoints(e.target.value)}
+                            min="0"
+                            step="1"
+                            className="w-full px-3 py-2 border border-[#DBE2EF] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] text-[#112D4E] placeholder-gray-400"
+                        />
                     </div>
                 </div>
-                {/* --- NEW: Is Code Assignment Checkbox --- */}
-                <div className="mb-4 mt-4 pt-3 border-t">
+
+                <div className="pt-3 border-t border-[#DBE2EF]"> {/* Subtle separator */}
                     <div className="relative flex items-start">
                         <div className="flex items-center h-5">
                             <input
-                                id="isCodeAssignment"
+                                id="isCodeAssignmentModal" // Changed ID to be unique if multiple modals could exist
                                 name="isCodeAssignment"
                                 type="checkbox"
                                 checked={isCodeAssignment}
                                 onChange={(e) => setIsCodeAssignment(e.target.checked)}
-                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                className="focus:ring-[#3F72AF] h-4 w-4 text-[#3F72AF] border-[#DBE2EF] rounded" // Palette colors
                             />
                         </div>
                         <div className="ml-3 text-sm">
-                            <label htmlFor="isCodeAssignment" className="font-medium text-gray-700">Code Assignment</label>
-                            <p className="text-xs text-gray-500">Enable test cases and automated checking features for this assignment.</p>
+                            <label htmlFor="isCodeAssignmentModal" className="font-medium text-[#112D4E]">
+                                Code Assignment
+                            </label>
+                            <p className="text-xs text-gray-500">Enable test cases and automated checking for this assignment.</p>
                         </div>
                     </div>
                 </div>
-                {/* --- End Checkbox --- */}
-                <button type="submit" disabled={isCreatingAssignment} className={`mt-2 w-full px-4 py-1.5 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 ${isCreatingAssignment ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    {isCreatingAssignment ? 'Creating...' : 'Create Assignment'}
-                </button>
+
+                <div className="pt-4 flex justify-end space-x-3">
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#DBE2EF] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={isCreatingAssignment}
+                        className={`flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-[#3F72AF] rounded-md hover:bg-[#112D4E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3F72AF] disabled:opacity-60 disabled:cursor-not-allowed transition-colors
+                            ${isCreatingAssignment ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                        {isCreatingAssignment && <FaSpinner className="animate-spin mr-2" />}
+                        {isCreatingAssignment ? 'Creating...' : 'Create Assignment'}
+                    </button>
+                </div>
             </form>
         </Modal>
-    </>
+    );
 }

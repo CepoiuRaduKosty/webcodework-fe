@@ -66,3 +66,7 @@ export interface UserSearchResultDto { // Matches backend DTO
     username: string;
     profilePhotoUrl?: string | null;
 }
+
+export interface LeaveClassroomPayload {
+    newOwnerUserId?: number | null; // Nullable because non-owners don't send it
+}

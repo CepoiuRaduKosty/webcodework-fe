@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       setAuthState({
         isAuthenticated: true,
-        user: { username: data.username, profilePhotoUrl: data.profilePhotoUrl },
+        user: { username: data.username, profilePhotoUrl: data.profilePhotoUrl, id: data.id },
         token: data.token,
         tokenExpiration: expirationDate,
         isLoading: false,

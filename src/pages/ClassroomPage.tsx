@@ -6,13 +6,14 @@ import { ClassroomDetailsDto } from '../types/classroom';
 import { ClassroomTopElement } from '../components/ClassroomTopElement';
 import { ClassroomAssignmentsSection } from '../components/ClassroomAssignmentsSection';
 import { ClassroomMembersSection } from '../components/ClassroomMembersSection';
+import { useAuth } from '../contexts/AuthContext';
 
 const ClassroomPage: React.FC = () => {
   const { classroomId } = useParams<{ classroomId: string }>();
   const [details, setDetails] = useState<ClassroomDetailsDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const fetchClassroomData = useCallback(async () => {
@@ -57,10 +58,10 @@ const ClassroomPage: React.FC = () => {
             &larr; Back to Dashboard
           </Link>
         </div>
-        <ClassroomTopElement classroomDetails={details} onClassroomDelete={handleClassroomDeleted} onClassroomUpdate={fetchClassroomData} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <ClassroomTopElement classroomDetails={details} onClassroomLeave={handleClassroomDeleted} onClassroomUpdate={fetchClassroomData} />
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <ClassroomAssignmentsSection details={details} />
-          <ClassroomMembersSection details={details} refreshClassroomData={fetchClassroomData}/>
+          <ClassroomMembersSection details={details} refreshClassroomData={fetchClassroomData} loggedInUserId={user?.id}/>
         </div>
       </div>
     </div>

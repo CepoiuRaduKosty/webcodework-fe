@@ -16,9 +16,11 @@ export interface AuthResponse {
   username: string;
   expiration: string; 
   profilePhotoUrl?: string | null;
+  id?: number;
 }
 
 export interface User {
+  id?: number;
   username: string;
   profilePhotoUrl?: string | null;
 }

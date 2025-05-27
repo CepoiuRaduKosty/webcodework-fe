@@ -1,6 +1,6 @@
 // src/services/classroomService.ts
 import api from './api';
-import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload, UserSearchResultDto} from '../types/classroom.ts'; // Define these types next
+import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload, UserSearchResultDto, LeaveClassroomPayload} from '../types/classroom.ts'; // Define these types next
 
 export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   try {
@@ -117,5 +117,37 @@ export const searchPotentialMembers = async (
     } catch (error: any) {
         console.error("Search Potential Members Error:", error.response?.data || error.message);
         throw error.response?.data || new Error('Failed to search for users.');
+    }
+};
+
+export const leaveClassroom = async (
+    classroomId: string | number,
+    payload?: LeaveClassroomPayload
+): Promise<void> => {
+    try {
+        // Backend returns 204 No Content on success
+        await api.post(`/api/classrooms/${classroomId}/leave`, payload || {}); // Send empty object if no payload
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.detail || // For ProblemDetails
+                             error.response?.data?.message || // For custom error objects
+                             error.message ||
+                             'Failed to leave classroom.';
+        throw new Error(errorMessage);
+    }
+};
+
+export const removeMemberFromClassroom = async (
+    classroomId: string | number,
+    memberUserIdToRemove: string | number
+): Promise<void> => {
+    try {
+        // Backend endpoint: DELETE /api/classrooms/{classroomId}/members/{memberUserIdToRemove}
+        await api.delete(`/api/classrooms/${classroomId}/members/${memberUserIdToRemove}`);
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.detail || // For ProblemDetails
+                             error.response?.data?.message ||
+                             error.message ||
+                             'Failed to remove member.';
+        throw new Error(errorMessage);
     }
 };
