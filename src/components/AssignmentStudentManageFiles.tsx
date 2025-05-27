@@ -1,7 +1,7 @@
 // src/components/AssignmentStudentManageFiles.tsx
 import React, { ChangeEvent, JSX, useRef, useState } from "react"; // Added React import
 import * as assignmentService from '../services/assignmentService';
-import { SubmissionDto } from "../types/assignment";
+import { SubmissionDto, SubmittedFileDto } from "../types/assignment";
 import {
     FaFileUpload, FaTrashAlt, FaSpinner, FaExclamationCircle,
     FaFilePdf, FaFileWord, FaFileImage, FaFileAlt, FaFileCode // Example file type icons
@@ -32,6 +32,20 @@ export const AssignmentStudentManageFiles: React.FC<{
     const [deletingFileId, setDeletingFileId] = useState<number | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [downloadingFileId, setDownloadingFileId] = useState<number | null>(null);
+
+    const handleDownloadFile = async (file: SubmittedFileDto) => {
+        if (!mySubmission?.id) return;
+        setDownloadingFileId(file.id);
+        try {
+            await assignmentService.downloadSubmittedFile(mySubmission.id, file.id, file.fileName);
+        } catch (error) {
+            // Error is already handled and alerted in the service function for this example
+            console.error("Download trigger failed:", error);
+        } finally {
+            setDownloadingFileId(null);
+        }
+    };
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
@@ -126,13 +140,14 @@ export const AssignmentStudentManageFiles: React.FC<{
                             <li key={file.id} className="flex items-center justify-between text-sm p-3 bg-[#F9F7F7] border border-[#DBE2EF] rounded-lg shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-center min-w-0">
                                     {getFileTypeIcon(file.fileName)}
-                                    {/* TODO: Add actual download link here */}
-                                    <a href="#" onClick={(e) => { e.preventDefault(); alert(`Download for ${file.fileName} not implemented.`); }}
-                                       className="font-medium text-[#3F72AF] hover:text-[#112D4E] hover:underline truncate"
-                                       title={file.fileName}
+                                    <button
+                                       onClick={() => handleDownloadFile(file)}
+                                       disabled={downloadingFileId === file.id}
+                                       className="font-medium text-[#3F72AF] hover:text-[#112D4E] hover:underline truncate text-left disabled:opacity-70 disabled:cursor-not-allowed"
+                                       title={`Download ${file.fileName}`}
                                     >
-                                        {file.fileName}
-                                    </a>
+                                        {downloadingFileId === file.id ? 'Downloading...' : file.fileName}
+                                    </button>
                                     <span className="ml-2 text-xs text-slate-500 flex-shrink-0">({(file.fileSize / 1024).toFixed(1)} KB)</span>
                                 </div>
                                 {canModifySubmission && (

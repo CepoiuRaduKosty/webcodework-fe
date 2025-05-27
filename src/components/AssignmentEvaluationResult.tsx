@@ -98,6 +98,8 @@ export const AssignmentEvaluationResult: React.FC<{
     evaluationError: string | null;
 }> = ({ isEvaluating, evaluationResult, evaluationError }) => {
 
+    console.log(evaluationResult)
+
     if (isEvaluating && !evaluationResult && !evaluationError) {
         return (
             <div className="flex items-center text-[#3F72AF] p-4 bg-[#DBE2EF] border border-[#3F72AF] rounded-lg shadow">

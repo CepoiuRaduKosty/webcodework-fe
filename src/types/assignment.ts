@@ -56,9 +56,10 @@ export interface SubmissionDto {
     lastEvaluationAt?: Date | null;
     lastEvaluationOverallStatus?: string | null;
     lastEvaluationDetailsJson?: string | null;
+    lastEvaluatedLanguage?: string | null;
 }
 
-export interface GradeSubmissionDto {
+export interface GradeSubmissionPayload {
   grade?: number | null;
   feedback?: string | null;
 }
@@ -72,6 +73,7 @@ export interface TeacherSubmissionViewDto {
     grade?: number | null;
     hasFiles: boolean;
     status: string; // "Not Submitted", "Submitted", "Late", "Graded", "In Progress"
+    profilePhotoUrl?: string | null;
 }
 
 export interface CreateVirtualFilePayload {

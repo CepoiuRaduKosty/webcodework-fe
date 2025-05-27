@@ -8,6 +8,7 @@ import {
     SubmittedFileDto,
     CreateVirtualFilePayload,
     UpdateAssignmentPayload,
+    GradeSubmissionPayload,
 } from '../types/assignment.ts'; // We'll define these types next
 import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
@@ -160,6 +161,95 @@ export const deleteAssignment = async (assignmentId: string | number): Promise<v
         await api.delete(`/api/assignments/${assignmentId}`);
     } catch (error: any) {
         throw error.response?.data?.message || error.message || 'Failed to delete assignment.';
+    }
+};
+
+export const downloadSubmittedFile = async (
+    submissionId: number | string,
+    fileId: number | string,
+    originalFileName: string
+): Promise<void> => {
+    try {
+        const response = await api.get(
+            // Match your backend route:
+            `/api/submissions/${submissionId}/files/${fileId}/download`,
+            // OR if it's just /api/submissions/{submissionId}/files/{fileId}
+            // `/api/submissions/${submissionId}/files/${fileId}`,
+            {
+                responseType: 'blob', // IMPORTANT: Tell Axios to expect binary data
+            }
+        );
+
+        // Create a Blob from the response data
+        const blob = new Blob([response.data], { type: response.headers['content-type'] || 'application/octet-stream' });
+
+        // Create a link element, click it to trigger download, then remove it
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', originalFileName); // Use the original filename
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href); // Clean up the object URL
+
+    } catch (error: any) {
+        console.error("Download File Error:", error.response?.data || error.message);
+        // Handle error - maybe parse blob if it's a JSON error response
+        let errorMessage = 'Failed to download file.';
+        if (error.response && error.response.data && error.response.data.type === 'application/problem+json') {
+             try {
+                const errorBlob = error.response.data as Blob;
+                const errorText = await errorBlob.text();
+                const errorJson = JSON.parse(errorText);
+                errorMessage = errorJson.detail || errorJson.title || errorMessage;
+             } catch (e) {
+                // Failed to parse error blob, use generic message
+             }
+        } else if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        alert(errorMessage); // Simple error display, replace with toast or better UI
+        throw new Error(errorMessage);
+    }
+};
+
+export const unsubmitStudentSubmission = async (submissionId: string | number): Promise<SubmissionDto> => {
+    try {
+        const response = await api.post<SubmissionDto>(`/api/submissions/${submissionId}/unsubmit`);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.detail || // For ProblemDetails
+                             error.response?.data?.message ||
+                             error.message ||
+                             'Failed to unsubmit assignment.';
+        throw new Error(errorMessage);
+    }
+};
+
+export const getSubmissionDetails = async (submissionId: string | number): Promise<SubmissionDto> => {
+    try {
+        const response = await api.get<SubmissionDto>(`/api/submissions/${submissionId}`);
+        return response.data;
+    } catch (error: any) {
+        throw error.response?.data || new Error(`Failed to fetch submission details for ID ${submissionId}`);
+    }
+};
+
+export const gradeSubmission = async (
+    submissionId: string | number,
+    payload: GradeSubmissionPayload
+): Promise<SubmissionDto> => { // Assuming backend returns the updated submission
+    try {
+        const response = await api.put<SubmissionDto>(`/api/submissions/${submissionId}/grade`, payload);
+        return response.data;
+    } catch (error: any) {
+        const errorMessage = error.response?.data?.errors?.Grade?.join(', ') ||
+                             error.response?.data?.message ||
+                             error.message ||
+                             'Failed to submit grade.';
+        throw new Error(errorMessage);
     }
 };
 

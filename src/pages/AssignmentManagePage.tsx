@@ -1,7 +1,7 @@
 // src/pages/AssignmentManagePage.tsx
-import React, { useEffect, useState, useCallback, FormEvent } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AssignmentDetailsDto } from '../types/assignment'; 
+import { AssignmentDetailsDto, TeacherSubmissionViewDto } from '../types/assignment';
 import { AssignmentTopElement } from '../components/AssignmentTopElement'
 import { TeacherViewSubmissionsTable } from '../components/TeacherViewSubmissionsTable';
 import * as assignmentService from '../services/assignmentService';
@@ -9,6 +9,9 @@ import { TestCasesSection } from '../components/TestCasesSection';
 import { useAuth } from '../contexts/AuthContext';
 import { ClassroomRole } from '../types/classroom';
 import * as classroomService from '../services/classroomService';
+import { GradedSubmissionsPieChart } from '../components/charts/GradedSubmissionsPieChart';
+import { SubmissionStatusPieChart } from '../components/charts/SubmissionStatusPieChart';
+import { GradeDistributionChart } from '../components/charts/GradeDistributionChart';
 
 const AssignmentManagePage: React.FC = () => {
     const { assignmentId } = useParams<{ assignmentId: string }>();
@@ -17,30 +20,44 @@ const AssignmentManagePage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
     const [currentUserClassroomRole, setCurrentUserClassroomRole] = useState<ClassroomRole | undefined>(undefined);
+    const [submissions, setSubmissions] = useState<TeacherSubmissionViewDto[]>([]);
+    const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(true);
 
-    // Fetch Assignment Details Callback
-    const fetchAssignmentData = useCallback(async () => {
-        if (!assignmentId) { setError("Assignment ID missing."); setIsLoadingDetails(false); return; }
+    const fetchPageData = useCallback(async () => {
+        if (!assignmentId) {
+            setError("Assignment ID missing.");
+            setIsLoadingDetails(false);
+            setIsLoadingSubmissions(false);
+            return;
+        }
         setIsLoadingDetails(true);
-        setError(null); // Clear previous errors
+        setIsLoadingSubmissions(true);
+        setError(null);
         try {
-            const assignmentData = await assignmentService.getAssignmentDetails(assignmentId);
+            // Fetch in parallel
+            const [assignmentData, submissionsData] = await Promise.all([
+                assignmentService.getAssignmentDetails(assignmentId),
+                assignmentService.getSubmissionsForAssignment(assignmentId) // Fetch submissions here
+            ]);
+
             setAssignmentDetails(assignmentData);
+            setSubmissions(submissionsData);
 
             if (assignmentData?.classroomId && user?.id) {
                 const classroomData = await classroomService.getClassroomDetails(assignmentData.classroomId);
                 setCurrentUserClassroomRole(classroomData.currentUserRole);
             }
         } catch (err: any) {
-            setError(err.message || `Failed to load assignment ${assignmentId}.`);
+            setError(err.message || `Failed to load assignment data.`);
         } finally {
             setIsLoadingDetails(false);
+            setIsLoadingSubmissions(false);
         }
-    }, [assignmentId]);
+    }, [assignmentId, user?.id]); // Added user?.id
 
     useEffect(() => {
-        fetchAssignmentData();
-    }, [fetchAssignmentData]);
+        fetchPageData();
+    }, [fetchPageData]);
 
     const isLoading = isLoadingDetails;
 
@@ -60,11 +77,18 @@ const AssignmentManagePage: React.FC = () => {
                     assignmentDetails={assignmentDetails}
                     currentUserId={user?.id}
                     currentUserClassroomRole={currentUserClassroomRole}
-                    onAssignmentUpdated={fetchAssignmentData}
-                    onAssignmentDeleted={fetchAssignmentData}
+                    onAssignmentUpdated={fetchPageData}
+                    onAssignmentDeleted={fetchPageData}
                 />
+                {assignmentDetails && !isLoading && (
+                    <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <GradedSubmissionsPieChart submissions={submissions} />
+                        <SubmissionStatusPieChart submissions={submissions} />
+                        <GradeDistributionChart submissions={submissions} assignmentDetails={assignmentDetails} />
+                    </div>
+                )}
                 <TestCasesSection assignmentDetails={assignmentDetails} />
-                <TeacherViewSubmissionsTable assignmentDetails={assignmentDetails} />
+                <TeacherViewSubmissionsTable assignmentDetails={assignmentDetails} submissions={submissions} isLoadingSubmissions={isLoadingSubmissions} fetchSubmissionsError={error} refreshSubmissions={fetchPageData}/>
             </div>
         </div>
     );
