@@ -42,7 +42,7 @@ const AssignmentManagePage: React.FC = () => {
 
             setAssignmentDetails(assignmentData);
             setSubmissions(submissionsData);
-
+            
             if (assignmentData?.classroomId && user?.id) {
                 const classroomData = await classroomService.getClassroomDetails(assignmentData.classroomId);
                 setCurrentUserClassroomRole(classroomData.currentUserRole);

@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (expirationDate > new Date()) {
           setAuthState({
             isAuthenticated: true,
-            user: { username: parsedData.username, profilePhotoUrl: parsedData.profilePhotoUrl },
+            user: { username: parsedData.username, profilePhotoUrl: parsedData.profilePhotoUrl, id: parsedData.id },
             token: parsedData.token,
             tokenExpiration: expirationDate,
             isLoading: false,
@@ -79,6 +79,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const data = await loginUser(credentials);
       const expirationDate = new Date(data.expiration);
+
+      console.log(data)
 
       localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify(data));
 
