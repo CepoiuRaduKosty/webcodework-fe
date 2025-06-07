@@ -55,7 +55,6 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
             }
             setIsSearching(true);
             setSearchError(null);
-            setSelectedUser(null);
             try {
                 const results = await classroomService.searchPotentialMembers(classroomId, searchTerm);
                 setSearchResults(results);
@@ -157,7 +156,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 {/* Display Selected User */}
                 {selectedUser && (
                     <div className="mb-4 p-3 bg-[#DBE2EF] rounded-md text-sm text-[#112D4E]">
-                        Selected: <span className="font-semibold">{selectedUser.username}</span> (ID: {selectedUser.userId})
+                        Selected: <span className="font-semibold">{selectedUser.username}</span>
                         <button type="button" onClick={() => { setSelectedUser(null); setSearchTerm(''); setSearchResults([]); }} className="ml-2 text-xs text-red-500 hover:underline">(Clear)</button>
                     </div>
                 )}
