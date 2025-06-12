@@ -132,7 +132,7 @@ const GradeSubmissionPage: React.FC = () => {
                         <h1 className="text-2xl md:text-3xl font-bold text-[#112D4E]">{assignment.title}</h1>
                         <div className="mt-2 flex items-center space-x-3 text-sm text-slate-600">
                             <FaUserCircle className="w-8 h-8 text-gray-400"/>
-                            <span>Student: <span className="font-medium text-[#112D4E]">{submission.studentUsername}</span> (ID: {submission.studentId})</span>
+                            <span>Student: <span className="font-medium text-[#112D4E]">{submission.studentUsername}</span></span>
                         </div>
                         <div className={`mt-2 text-sm font-semibold flex items-center ${submissionStatusInfo.color}`}>
                             {submissionStatusInfo.icon} <span className="ml-1.5">{submissionStatusInfo.text}</span>

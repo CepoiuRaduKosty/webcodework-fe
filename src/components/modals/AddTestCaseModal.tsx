@@ -56,8 +56,8 @@ export const AddTestCaseModal: React.FC<{
         }
 
         const timeMsNum = parseInt(newTestCaseMaxTimeMs, 10);
-        if (isNaN(timeMsNum) || timeMsNum < 100 || timeMsNum > 10000) {
-            setAddTestCaseError("Max execution time must be between 100ms and 10000ms."); return;
+        if (isNaN(timeMsNum) || timeMsNum < 100 || timeMsNum > 100000) {
+            setAddTestCaseError("Max execution time must be between 100ms and 100000ms."); return;
         }
 
         const ramMbNum = parseInt(newTestCaseMaxRamMB, 10);
@@ -135,7 +135,7 @@ export const AddTestCaseModal: React.FC<{
                         <input
                             id="testCaseMaxTimeMsModal" type="number" value={newTestCaseMaxTimeMs}
                             onChange={(e) => setNewTestCaseMaxTimeMs(e.target.value)}
-                            min="100" max="10000" step="100"
+                            min="100" max="100000" step="100"
                             className="w-full px-3 py-2.5 border border-[#DBE2EF] rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-transparent placeholder-gray-400"
                             placeholder="e.g., 2000" required
                         />
