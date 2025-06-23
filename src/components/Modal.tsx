@@ -1,4 +1,4 @@
-// Simple Modal Component (example - consider using a library like Headless UI or react-modal)
+
 export const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
     return (

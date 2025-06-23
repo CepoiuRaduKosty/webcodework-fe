@@ -1,4 +1,4 @@
-// src/services/testcaseService.ts
+
 
 import { TestCaseDetailDto, TestCaseListDto } from '../types/testcase';
 import api from './api';
@@ -38,7 +38,7 @@ export const updateTestCaseOutputContent = async (testCaseId: string | number, c
     }
 };
 
-// MODIFIED Function to add a test case
+
 export const addTestCase = async (assignmentId: string | number, inputFileName: string, outputFileName: string, points: number, maxExecutionTimeMs: number, maxRamMB: number): Promise<TestCaseDetailDto> => {
     const formData = new FormData();
     formData.append('InputFileName', inputFileName);
@@ -49,16 +49,16 @@ export const addTestCase = async (assignmentId: string | number, inputFileName: 
 
     try {
         const response = await api.post<TestCaseDetailDto>(
-            `/api/assignments/${assignmentId}/testcases`, // URL
-            formData, // Data
-            { // <--- Axios Request Config Options HERE
+            `/api/assignments/${assignmentId}/testcases`, 
+            formData, 
+            { 
                 headers: {
-                    // Explicitly set Content-Type to undefined for this request.
-                    // This tells Axios to IGNORE the global default and correctly
-                    // set 'multipart/form-data; boundary=...' based on the FormData object.
+                    
+                    
+                    
                     'Content-Type': undefined
-                    // Alternatively, sometimes null works too: 'Content-Type': null
-                    // Avoid setting 'multipart/form-data' manually as Axios handles the boundary.
+                    
+                    
                 }
             }
         );

@@ -1,9 +1,9 @@
-// src/components/charts/GradeDistributionChart.tsx
+
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { TeacherSubmissionViewDto } from '../../types/assignment';
-import { AssignmentDetailsDto } from '../../types/assignment'; // For maxPoints
+import { AssignmentDetailsDto } from '../../types/assignment'; 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -13,10 +13,10 @@ interface GradeDistributionChartProps {
 }
 
 export const GradeDistributionChart: React.FC<GradeDistributionChartProps> = ({ submissions, assignmentDetails }) => {
-    const maxPoints = assignmentDetails.maxPoints ?? 100; // Default to 100 if not set
+    const maxPoints = assignmentDetails.maxPoints ?? 100; 
 
-    // Define grade categories based on percentage of maxPoints
-    // Adjust these ranges and labels as you see fit
+    
+    
     const gradeCategories = [
         { label: 'F (<60%)', min: 0, max: 59.99, count: 0 },
         { label: 'D (60-69%)', min: 60, max: 69.99, count: 0 },
@@ -43,22 +43,22 @@ export const GradeDistributionChart: React.FC<GradeDistributionChartProps> = ({ 
             {
                 label: 'Number of Students',
                 data: gradeCategories.map(cat => cat.count),
-                backgroundColor: '#3F72AF', // Palette: Medium Blue
-                borderColor: '#112D4E',     // Palette: Darkest Blue
+                backgroundColor: '#3F72AF', 
+                borderColor: '#112D4E',     
                 borderWidth: 1,
             },
         ],
     };
 
     const options = {
-        indexAxis: 'y' as const, // Makes it a horizontal bar chart
+        indexAxis: 'y' as const, 
         responsive: true,
         maintainAspectRatio: false,
         scales: {
             x: {
                 beginAtZero: true,
                 title: { display: true, text: 'Number of Students', color: '#112D4E'},
-                ticks: { color: '#112D4E', stepSize: 1 }, // Ensure whole numbers
+                ticks: { color: '#112D4E', stepSize: 1 }, 
                 grid: { color: '#DBE2EF' }
             },
             y: {
@@ -68,7 +68,7 @@ export const GradeDistributionChart: React.FC<GradeDistributionChartProps> = ({ 
         },
         plugins: {
             legend: {
-                display: false, // Usually not needed for single dataset bar chart
+                display: false, 
             },
             title: {
                 display: true,

@@ -1,40 +1,40 @@
-// src/components/TestCasesSection.tsx
-import React, { useCallback, useEffect, useState } from "react"; // Added React import
+
+import React, { useCallback, useEffect, useState } from "react"; 
 import { AssignmentDetailsDto } from "../types/assignment";
-import * as testcaseService from '../services/testcaseService'; // Assuming correct path
-import { TestCaseListDto } from "../types/testcase";        // Assuming correct path
-import { AddTestCaseModal } from "./modals/AddTestCaseModal";   // Assuming correct path
-import { FaPlus, FaListAlt, FaExclamationCircle, FaSpinner } from 'react-icons/fa'; // Example icons
+import * as testcaseService from '../services/testcaseService'; 
+import { TestCaseListDto } from "../types/testcase";        
+import { AddTestCaseModal } from "./modals/AddTestCaseModal";   
+import { FaPlus, FaListAlt, FaExclamationCircle, FaSpinner } from 'react-icons/fa'; 
 import { TestCaseList } from "./TestCaseList";
 
 export const TestCasesSection: React.FC<{ assignmentDetails: AssignmentDetailsDto, isEditable: boolean }> = ({ assignmentDetails, isEditable }) => {
     const [showAddTestCaseModal, setShowAddTestCaseModal] = useState(false);
     const [isLoadingTestCases, setIsLoadingTestCases] = useState(true);
     const [testCases, setTestCases] = useState<TestCaseListDto[]>([]);
-    const [fetchError, setFetchError] = useState<string | null>(null); // Added for fetch errors
+    const [fetchError, setFetchError] = useState<string | null>(null); 
 
     const addTestCaseModalSuccessfulFinish = async () => {
         setShowAddTestCaseModal(false);
-        await fetchTestCasesOverview(); // Refresh after adding
+        await fetchTestCasesOverview(); 
     };
 
     const fetchTestCasesOverview = useCallback(async () => {
-        if (!assignmentDetails?.id) { // Check assignmentDetails itself
-            // This case should ideally not happen if TestCasesSection is only rendered when assignmentDetails is present.
-            // However, if assignmentDetails.id is null/undefined, it's an issue.
+        if (!assignmentDetails?.id) { 
+            
+            
             setIsLoadingTestCases(false);
             setTestCases([]);
             return;
         }
-        // Only fetch test cases if it's a code assignment
+        
         if (!assignmentDetails.isCodeAssignment) {
             setIsLoadingTestCases(false);
-            setTestCases([]); // Ensure it's empty if not a code assignment
+            setTestCases([]); 
             return;
         }
 
         setIsLoadingTestCases(true);
-        setFetchError(null); // Clear previous errors
+        setFetchError(null); 
         try {
             const data = await testcaseService.getTestCases(assignmentDetails.id);
             setTestCases(data);
@@ -44,23 +44,23 @@ export const TestCasesSection: React.FC<{ assignmentDetails: AssignmentDetailsDt
         } finally {
             setIsLoadingTestCases(false);
         }
-    }, [assignmentDetails]); // Depend on the whole assignmentDetails object
+    }, [assignmentDetails]); 
 
     useEffect(() => {
-        // Fetch only if it's a code assignment and details are present
+        
         if (assignmentDetails?.id && assignmentDetails.isCodeAssignment) {
             fetchTestCasesOverview();
         } else if (!assignmentDetails?.isCodeAssignment) {
-            // If it's not a code assignment, ensure loading is false and test cases are empty
+            
             setIsLoadingTestCases(false);
             setTestCases([]);
         }
     }, [fetchTestCasesOverview, assignmentDetails?.isCodeAssignment, assignmentDetails?.id]);
 
 
-    // If it's not a code assignment, don't render this section at all.
+    
     if (!assignmentDetails.isCodeAssignment) {
-        return null; // Or a message indicating this assignment doesn't support test cases
+        return null; 
     }
 
     return (
@@ -102,7 +102,7 @@ export const TestCasesSection: React.FC<{ assignmentDetails: AssignmentDetailsDt
                 {/* Test Case List (delegated to TestCaseList component) */}
                 {!isLoadingTestCases && !fetchError && (
                     <TestCaseList
-                        isLoadingTestCases={isLoadingTestCases} // Though it's false here, pass for consistency if TestCaseList uses it
+                        isLoadingTestCases={isLoadingTestCases} 
                         testCases={testCases}
                         assignmentDetails={assignmentDetails}
                         requestRefresh={fetchTestCasesOverview}

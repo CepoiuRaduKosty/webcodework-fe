@@ -1,5 +1,5 @@
-// src/components/AssignmentWorkStatus.tsx
-import React, { JSX } from 'react'; // Ensure React is imported
+
+import React, { JSX } from 'react'; 
 import { AssignmentDetailsDto, SubmissionDto } from "../types/assignment";
 import { format, parseISO } from 'date-fns';
 import {
@@ -14,13 +14,13 @@ import { EvaluationStatus } from '../types/evaluation';
 
 export const AssignmentWorkStatus: React.FC<{
     assignmentDetails: AssignmentDetailsDto,
-    mySubmission: SubmissionDto | null // mySubmission can be null if not started
+    mySubmission: SubmissionDto | null 
 }> = ({ assignmentDetails, mySubmission }) => {
 
     const formatDate = (dateString: string | null | undefined): string => {
         if (!dateString) return 'N/A';
         try {
-            return format(parseISO(dateString), 'MMM d, yyyy, h:mm a'); // Adjusted format
+            return format(parseISO(dateString), 'MMM d, yyyy, h:mm a'); 
         } catch {
             return 'Invalid Date';
         }
@@ -31,13 +31,13 @@ export const AssignmentWorkStatus: React.FC<{
     let scoreElement: JSX.Element | null = null;
 
     if (!mySubmission) {
-        statusColorClass = "text-yellow-600"; // Using yellow for attention, could be palette blue
+        statusColorClass = "text-yellow-600"; 
         statusElement = (
             <div className={`flex items-center font-semibold ${statusColorClass}`}>
                 <FaInfoCircle className="mr-2" /> Not Started
             </div>
         );
-    } else if (mySubmission.grade != null) { // Check for non-null grade
+    } else if (mySubmission.grade != null) { 
         statusColorClass = "text-green-600";
         statusElement = (
             <div className={`flex items-center font-bold ${statusColorClass}`}>
@@ -45,11 +45,11 @@ export const AssignmentWorkStatus: React.FC<{
             </div>
         );
     } else if (mySubmission.submittedAt) {
-        // It's turned in, now check if it's a code assignment with evaluation points
+        
         const isLate = mySubmission.isLate;
         let turnedInText = "Turned In";
         let turnedInIcon = <FaPaperPlane className="mr-2 flex-shrink-0" />;
-        statusColorClass = "text-[#3F72AF]"; // Primary blue for on-time
+        statusColorClass = "text-[#3F72AF]"; 
 
         if (isLate) {
             turnedInText = "Turned In (Late)";
@@ -63,10 +63,10 @@ export const AssignmentWorkStatus: React.FC<{
             </div>
         );
 
-        // Add automated score if available for code assignments that are turned in
+        
         if (assignmentDetails.isCodeAssignment &&
-            mySubmission.lastEvaluationPointsObtained != null && // Check for non-null
-            mySubmission.lastEvaluationTotalPossiblePoints != null) { // Check for non-null
+            mySubmission.lastEvaluationPointsObtained != null && 
+            mySubmission.lastEvaluationTotalPossiblePoints != null) { 
             scoreElement = (
                 <div className="mt-1 text-xs text-[#112D4E] flex items-center">
                     <FaCalculator className="mr-1.5 text-[#3F72AF]" />
@@ -77,19 +77,19 @@ export const AssignmentWorkStatus: React.FC<{
                 </div>
             );
         }
-    } else { // Not submitted yet, but a submission record exists (in progress)
+    } else { 
         statusColorClass = "text-orange-500";
         statusElement = (
             <div className={`flex items-center font-semibold ${statusColorClass}`}>
                 <FaInfoCircle className="mr-2 flex-shrink-0" /> Assigned (In Progress)
             </div>
         );
-        // Optionally, show last evaluation score even if "In Progress"
-        // This might be useful if students can "run" tests before "turning in"
+        
+        
         if (assignmentDetails.isCodeAssignment &&
             mySubmission.lastEvaluationPointsObtained != null &&
             mySubmission.lastEvaluationTotalPossiblePoints != null &&
-            mySubmission.lastEvaluationOverallStatus !== EvaluationStatus.CompileError // Maybe don't show score if last run was compile error
+            mySubmission.lastEvaluationOverallStatus !== EvaluationStatus.CompileError 
         ) {
             scoreElement = (
                 <div className="mt-1 text-xs text-gray-600 flex items-center">
@@ -118,7 +118,7 @@ export const AssignmentWorkStatus: React.FC<{
                     {mySubmission.submittedAt && (
                         <p>Official submission: {formatDate(mySubmission.submittedAt)}</p>
                     )}
-                    {mySubmission.grade != null && mySubmission.gradedAt && ( // For manual grade
+                    {mySubmission.grade != null && mySubmission.gradedAt && ( 
                         <p>Manually graded: {formatDate(mySubmission.gradedAt)} by {mySubmission.gradedByUsername ?? 'Instructor'}</p>
                     )}
                     {mySubmission.feedback && (

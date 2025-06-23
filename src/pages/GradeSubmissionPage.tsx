@@ -1,4 +1,4 @@
-// src/pages/GradeSubmissionPage.tsx
+
 import React, { useEffect, useState, useCallback, FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import * as assignmentService from '../services/assignmentService';
@@ -6,7 +6,7 @@ import { AssignmentDetailsDto, SubmissionDto, GradeSubmissionPayload } from '../
 import { format, parseISO, isValid } from 'date-fns';
 import { Editor } from '@monaco-editor/react';
 import { FaUserCircle, FaPaperPlane, FaClock, FaCheckCircle, FaInfoCircle, FaExclamationTriangle, FaSpinner, FaSave } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext'; // For current user, if needed for display
+import { useAuth } from '../contexts/AuthContext'; 
 import { SubmittedFilesList } from '../components/SubmittedFileList';
 import { AssignmentEvaluationResult } from '../components/AssignmentEvaluationResult';
 import { FrontendEvaluateResponseDto } from '../types/evaluation';
@@ -21,7 +21,7 @@ const formatDate = (dateString: string | null | undefined): string => {
 const GradeSubmissionPage: React.FC = () => {
     const { submissionId } = useParams<{ submissionId: string }>();
     const navigate = useNavigate();
-    const { user: authUser } = useAuth(); // Current logged-in user (teacher/owner)
+    const { user: authUser } = useAuth(); 
 
     const [submission, setSubmission] = useState<SubmissionDto | null>(null);
     const [assignment, setAssignment] = useState<AssignmentDetailsDto | null>(null);
@@ -45,7 +45,7 @@ const GradeSubmissionPage: React.FC = () => {
         try {
             const subData = await assignmentService.getSubmissionDetails(submissionId);
             setSubmission(subData);
-            setGrade(subData.grade?.toString() || ''); // Pre-fill form if already graded
+            setGrade(subData.grade?.toString() || ''); 
             setFeedback(subData.feedback || '');
 
             if (subData.assignmentId) {
@@ -96,11 +96,11 @@ const GradeSubmissionPage: React.FC = () => {
         };
         try {
             const updatedSubmission = await assignmentService.gradeSubmission(submission.id, payload);
-            setSubmission(updatedSubmission); // Update local state with new grade/feedback
+            setSubmission(updatedSubmission); 
             setGrade(updatedSubmission.grade?.toString() || '');
             setFeedback(updatedSubmission.feedback || '');
             setGradeSubmitSuccess("Grade and feedback submitted successfully!");
-            // Optionally, navigate back or show persistent success
+            
         } catch (err: any) {
             setGradeSubmitError(err.message || "Failed to submit grade.");
         } finally {

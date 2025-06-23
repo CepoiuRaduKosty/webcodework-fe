@@ -1,8 +1,8 @@
-// src/types/auth.ts
+
 
 export interface RegisterPayload {
   username: string;
-  password?: string; // Make password optional here if you handle confirmation separately
+  password?: string; 
 }
 
 export interface LoginPayload {
@@ -10,7 +10,7 @@ export interface LoginPayload {
   password?: string;
 }
 
-// Matches the DTO returned from the backend login endpoint
+
 export interface AuthResponse {
   token: string;
   username: string;
@@ -29,5 +29,5 @@ export interface UserProfileDto {
     id: number;
     username: string;
     profilePhotoUrl?: string | null;
-    createdAt: string; // ISO Date string
+    createdAt: string; 
 }

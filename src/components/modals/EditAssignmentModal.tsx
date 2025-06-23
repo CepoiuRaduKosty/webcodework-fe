@@ -1,6 +1,6 @@
-// src/components/modals/EditAssignmentModal.tsx
+
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Modal } from '../Modal'; // Your reusable Modal component
+import { Modal } from '../Modal'; 
 import { AssignmentDetailsDto, UpdateAssignmentPayload } from '../../types/assignment';
 import * as assignmentService from '../../services/assignmentService';
 import { FaSpinner } from 'react-icons/fa';
@@ -9,7 +9,7 @@ interface EditAssignmentModalProps {
     isOpen: boolean;
     onClose: () => void;
     assignment: AssignmentDetailsDto;
-    onAssignmentUpdated: () => Promise<void>; // Callback to refresh data
+    onAssignmentUpdated: () => Promise<void>; 
 }
 
 export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
@@ -34,7 +34,7 @@ export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
             setInstructions(assignment.instructions || '');
             setDueDate(assignment.dueDate ? new Date(assignment.dueDate).toISOString().substring(0, 16) : '');
             setMaxPoints(assignment.maxPoints?.toString() || '');
-            setError(null); // Clear error when modal opens
+            setError(null); 
         }
     }, [isOpen, assignment]);
 
@@ -60,7 +60,7 @@ export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
         try {
             await assignmentService.updateAssignment(assignment.id, payload);
             await onAssignmentUpdated();
-            onClose(); // Close modal on success
+            onClose(); 
         } catch (err: any) {
             setError(err.message || "Failed to update assignment.");
         } finally {

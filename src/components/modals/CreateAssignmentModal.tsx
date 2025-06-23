@@ -1,13 +1,13 @@
-// src/components/modals/CreateAssignmentModal.tsx (or your actual path)
-import React, { FormEvent, useEffect, useState } from "react"; // Added React import
+
+import React, { FormEvent, useEffect, useState } from "react"; 
 import { CreateAssignmentDto } from "../../types/assignment";
-import { Modal } from "../Modal"; // Assuming Modal is in ../Modal
+import { Modal } from "../Modal"; 
 import { ClassroomDetailsDto } from "../../types/classroom";
 import * as assignmentService from '../../services/assignmentService';
-import { FaSpinner } from "react-icons/fa"; // For loading state on button
+import { FaSpinner } from "react-icons/fa"; 
 
 export const CreateAssignmentModal: React.FC<{
-    details: ClassroomDetailsDto, // Classroom details to get classroomId
+    details: ClassroomDetailsDto, 
     show: boolean,
     onSuccessCallback: () => Promise<void>,
     onCancelCallback: () => void
@@ -28,17 +28,17 @@ export const CreateAssignmentModal: React.FC<{
         setNewAssignmentMaxPoints('');
         setIsCodeAssignment(false);
         setCreateAssignmentError(null);
-        // setIsCreatingAssignment(false); // Keep this to avoid race condition if modal closes fast
+        
     };
 
     useEffect(() => {
         if (!show) {
             const timer = setTimeout(() => {
                  resetForm();
-            }, 150); // Delay for modal close animation
+            }, 150); 
              return () => clearTimeout(timer);
         } else {
-            // Optionally reset error when modal re-opens
+            
             setCreateAssignmentError(null);
         }
     }, [show]);
@@ -67,8 +67,8 @@ export const CreateAssignmentModal: React.FC<{
 
         try {
             await assignmentService.createAssignment(details.id, payload);
-            // resetForm(); // Form will reset via useEffect when `show` becomes false
-            await onSuccessCallback(); // This should eventually set `show` to false
+            
+            await onSuccessCallback(); 
         } catch (err: any) {
             setCreateAssignmentError(err.message || 'Failed to create assignment.');
         } finally {
@@ -77,7 +77,7 @@ export const CreateAssignmentModal: React.FC<{
     };
 
     const handleCancel = () => {
-        // resetForm(); // Let useEffect handle reset on show=false
+        
         onCancelCallback();
     };
 
@@ -149,12 +149,12 @@ export const CreateAssignmentModal: React.FC<{
                     <div className="relative flex items-start">
                         <div className="flex items-center h-5">
                             <input
-                                id="isCodeAssignmentModal" // Changed ID to be unique if multiple modals could exist
+                                id="isCodeAssignmentModal" 
                                 name="isCodeAssignment"
                                 type="checkbox"
                                 checked={isCodeAssignment}
                                 onChange={(e) => setIsCodeAssignment(e.target.checked)}
-                                className="focus:ring-[#3F72AF] h-4 w-4 text-[#3F72AF] border-[#DBE2EF] rounded" // Palette colors
+                                className="focus:ring-[#3F72AF] h-4 w-4 text-[#3F72AF] border-[#DBE2EF] rounded" 
                             />
                         </div>
                         <div className="ml-3 text-sm">

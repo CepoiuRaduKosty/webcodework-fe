@@ -1,12 +1,12 @@
-// src/components/ClassroomAssignmentsSection.tsx
-import React, { useCallback, useEffect, useMemo, useState } from 'react'; // Added React and useMemo
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react'; 
 import { AssignmentBasicDto } from "../types/assignment";
 import { ClassroomDetailsDto, ClassroomRole } from "../types/classroom";
 import * as assignmentService from '../services/assignmentService';
 import { Link } from "react-router-dom";
 import { format, parseISO } from "date-fns";
-import { CreateAssignmentModal } from "./modals/CreateAssignmentModal"; // Assuming modal is here
-import { FaSearch, FaPlus, FaChevronLeft, FaChevronRight, FaExclamationCircle, FaClipboardList } from 'react-icons/fa'; // Example icons
+import { CreateAssignmentModal } from "./modals/CreateAssignmentModal"; 
+import { FaSearch, FaPlus, FaChevronLeft, FaChevronRight, FaExclamationCircle, FaClipboardList } from 'react-icons/fa'; 
 
 const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
@@ -21,10 +21,10 @@ export const ClassroomAssignmentsSection: React.FC<{ details: ClassroomDetailsDt
     const [assignmentError, setAssignmentError] = useState<string | null>(null);
     const [showCreateAssignmentModal, setShowCreateAssignmentModal] = useState(false);
 
-    // --- NEW State for Search and Pagination ---
+    
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    // -------------------------------------------
+    
 
     const fetchAssignments = useCallback(async () => {
         if (!details?.id) return;
@@ -32,20 +32,20 @@ export const ClassroomAssignmentsSection: React.FC<{ details: ClassroomDetailsDt
         setAssignmentError(null);
         try {
             const data = await assignmentService.getAssignmentsForClassroom(details.id);
-            // Backend already sorts by CreatedAt descending
+            
             setAssignments(data);
         } catch (err: any) {
             setAssignmentError(err.message || 'Failed to load assignments.');
         } finally {
             setIsLoadingAssignments(false);
         }
-    }, [details?.id]); // Depend on details.id
+    }, [details?.id]); 
 
     useEffect(() => {
-        if (details?.id) { // Fetch only if details.id is available
+        if (details?.id) { 
             fetchAssignments();
         }
-    }, [fetchAssignments]); // fetchAssignments callback depends on details.id
+    }, [fetchAssignments]); 
 
     const onModalCloseHandler = () => setShowCreateAssignmentModal(false);
     const onModalSuccessHandler = async () => {
@@ -56,7 +56,7 @@ export const ClassroomAssignmentsSection: React.FC<{ details: ClassroomDetailsDt
     const canCreateAssignments = details.currentUserRole === ClassroomRole.Owner || details.currentUserRole === ClassroomRole.Teacher;
     const isTeacherOrOwner = details.currentUserRole === ClassroomRole.Owner || details.currentUserRole === ClassroomRole.Teacher;
 
-    // --- Filtered and Paginated Assignments ---
+    
     const filteredAssignments = useMemo(() => {
         return assignments.filter(assignment =>
             assignment.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -70,14 +70,14 @@ export const ClassroomAssignmentsSection: React.FC<{ details: ClassroomDetailsDt
         return filteredAssignments.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     }, [filteredAssignments, currentPage]);
 
-    // Reset to page 1 if search term changes and current page becomes invalid
+    
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
 
     const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
     const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
-    // --------------------------------------------
+    
 
     return (
         <>
@@ -143,7 +143,7 @@ export const ClassroomAssignmentsSection: React.FC<{ details: ClassroomDetailsDt
                                     : `/assignments/${assignment.id}`;
                                 const statusStyles = assignment.submissionStatus === 'Graded' ? 'bg-green-100 text-green-800' :
                                                      assignment.submissionStatus?.includes('Submitted') ? 'bg-blue-100 text-blue-800' :
-                                                     'bg-gray-100 text-gray-700'; // Default/Not Submitted/In Progress
+                                                     'bg-gray-100 text-gray-700'; 
 
                                 return (
                                     <li key={assignment.id} className="bg-white border border-[#DBE2EF] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -200,7 +200,7 @@ export const ClassroomAssignmentsSection: React.FC<{ details: ClassroomDetailsDt
             </div>
 
             {/* Create Assignment Modal */}
-            {details && ( // Ensure details is loaded before rendering modal if it depends on it
+            {details && ( 
                 <CreateAssignmentModal
                     details={details}
                     show={showCreateAssignmentModal}

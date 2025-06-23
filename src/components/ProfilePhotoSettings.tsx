@@ -1,4 +1,4 @@
-// src/components/ProfilePhotoSettings.tsx
+
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import * as accountService from '../services/accountService';
@@ -23,13 +23,13 @@ export const ProfilePhotoSettings: React.FC = () => {
 
         try {
             const updatedProfile = await accountService.uploadProfilePhoto(file);
-            updateUserProfilePhoto(updatedProfile.profilePhotoUrl || null); // Update context
+            updateUserProfilePhoto(updatedProfile.profilePhotoUrl || null); 
             setSuccessMessage("Profile photo updated successfully!");
         } catch (err: any) {
             setError(err.message || "Failed to upload photo.");
         } finally {
             setIsUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+            if (fileInputRef.current) fileInputRef.current.value = ""; 
         }
     };
 
@@ -42,7 +42,7 @@ export const ProfilePhotoSettings: React.FC = () => {
         setIsDeleting(true);
         try {
             await accountService.deleteProfilePhoto();
-            updateUserProfilePhoto(null); // Update context
+            updateUserProfilePhoto(null); 
             setSuccessMessage("Profile photo removed successfully!");
         } catch (err: any) {
             setError(err.message || "Failed to remove photo.");

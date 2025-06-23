@@ -1,6 +1,6 @@
-// src/services/authService.ts
+
 import api from './api';
-import { LoginPayload, RegisterPayload, AuthResponse } from '../types/auth.ts'; // We'll create these types
+import { LoginPayload, RegisterPayload, AuthResponse } from '../types/auth.ts'; 
 
 export const loginUser = async (credentials: LoginPayload): Promise<AuthResponse> => {
   try {

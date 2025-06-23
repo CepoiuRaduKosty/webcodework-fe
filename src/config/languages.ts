@@ -6,4 +6,4 @@ export const SUPPORTED_LANGUAGES = [
     { value: "python", label: "Python", monacoLang: "python" },
 ];
 
-export const SOLUTION_FILENAME = "solution"; // Generic filename without extension
+export const SOLUTION_FILENAME = "solution"; 

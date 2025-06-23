@@ -1,4 +1,4 @@
-// src/components/charts/SubmissionStatusPieChart.tsx
+
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
@@ -15,13 +15,13 @@ export const SubmissionStatusPieChart: React.FC<SubmissionStatusPieChartProps> =
     let inProgressCount = 0;
     let submittedOnTimeCount = 0;
     let submittedLateCount = 0;
-    // We'll exclude already graded ones from this view to focus on work-in-progress/pending
-    // Or, include them for a full overview. Let's exclude for now to focus on "actionable" statuses for teacher.
+    
+    
 
     submissions.forEach(s => {
-        if (s.grade != null) return; // Skip graded for this chart
+        if (s.grade != null) return; 
 
-        switch (s.status.toUpperCase()) { // Normalize status comparison
+        switch (s.status.toUpperCase()) { 
             case "NOT SUBMITTED":
                 notSubmittedCount++;
                 break;
@@ -31,10 +31,10 @@ export const SubmissionStatusPieChart: React.FC<SubmissionStatusPieChartProps> =
             case "SUBMITTED":
                 submittedOnTimeCount++;
                 break;
-            case "SUBMITTED (LATE)": // Assuming this specific string for late
+            case "SUBMITTED (LATE)": 
                 submittedLateCount++;
                 break;
-            // Intentionally omitting CompileError, RuntimeError etc. as they are transient before a valid submission
+            
         }
     });
 
@@ -44,12 +44,12 @@ export const SubmissionStatusPieChart: React.FC<SubmissionStatusPieChartProps> =
             {
                 data: [notSubmittedCount, inProgressCount, submittedOnTimeCount, submittedLateCount],
                 backgroundColor: [
-                    '#DBE2EF', // Palette: Light Blue/Gray (Not Submitted)
-                    '#FBBF24', // Tailwind yellow-500 for In Progress (distinct)
-                    '#3F72AF', // Palette: Medium Blue (Submitted On Time)
-                    '#EF4444', // Tailwind red-500 for Late (distinct)
+                    '#DBE2EF', 
+                    '#FBBF24', 
+                    '#3F72AF', 
+                    '#EF4444', 
                 ],
-                borderColor: '#F9F7F7', // Palette: Lightest
+                borderColor: '#F9F7F7', 
                 borderWidth: 2,
             },
         ],
@@ -68,8 +68,7 @@ export const SubmissionStatusPieChart: React.FC<SubmissionStatusPieChartProps> =
                 text: 'Current Submission Progress (Ungraded)',
                 color: '#112D4E',
                 font: { size: 16, weight: 'bold' as const }
-            },
-             tooltip: { /* ... same callback as GradedSubmissionsPieChart ... */ }
+            }
         },
     };
 

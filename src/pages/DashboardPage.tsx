@@ -1,10 +1,10 @@
-// src/pages/DashboardPage.tsx
+
 import React, { useEffect, useState, useCallback, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import * as classroomService from '../services/classroomService';
 import { UserClassroomDto, CreateClassroomPayload, ClassroomRole } from '../types/classroom';
-import { FaChalkboardTeacher, FaPlus, FaTimes, FaInfoCircle, FaCog, FaUserCircle } from 'react-icons/fa'; // Example icons
+import { FaChalkboardTeacher, FaPlus, FaTimes, FaInfoCircle, FaCog, FaUserCircle } from 'react-icons/fa'; 
 
 const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -47,7 +47,7 @@ const DashboardPage: React.FC = () => {
       await classroomService.createClassroom(payload);
       setShowCreateForm(false); setNewClassroomName(''); setNewClassroomDesc('');
       await fetchClassrooms();
-      // TODO: Add a success toast
+      
     } catch (err: any) {
       setCreateError(err.message || 'Failed to create classroom.');
     } finally {
@@ -63,11 +63,11 @@ const DashboardPage: React.FC = () => {
           {classroom.photoUrl ? (
             <img src={classroom.photoUrl} alt={`${classroom.name} cover`} className="w-full h-full object-cover" />
           ) : (
-            // Placeholder with initials or generic icon
+            
             <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-[#3F72AF] bg-[#DBE2EF]">
               {classroom.name.substring(0, 2).toUpperCase()}
             </div>
-            // Or use an icon: <FaChalkboardTeacher size={60} className="text-[#3F72AF] opacity-50" />
+            
           )}
         </div>
         {/* Content Area */}

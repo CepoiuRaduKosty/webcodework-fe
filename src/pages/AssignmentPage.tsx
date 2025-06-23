@@ -1,4 +1,4 @@
-// src/pages/AssignmentPage.tsx
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import * as assignmentService from '../services/assignmentService';
@@ -16,7 +16,7 @@ const AssignmentPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const { user } = useAuth();
 
-    // Fetch Assignment Details Callback
+    
     const fetchAssignmentData = useCallback(async () => {
         if (!assignmentId) { setError("Assignment ID missing."); setIsLoadingAssignment(false); return; }
         setIsLoadingAssignment(true);
@@ -35,12 +35,12 @@ const AssignmentPage: React.FC = () => {
         fetchAssignmentData();
     }, [fetchAssignmentData]);
 
-    // --- Render Logic ---
+    
     if (isLoadingAssignment) return <div className="container mx-auto mt-10 p-6 text-center">Loading assignment data...</div>;
     if (error) return <div className="container mx-auto mt-10 p-6 text-center text-red-600">Error: {error}</div>;
     if (!assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center">Loading assignment details...</div>;
 
-    const isStudentView = true; // Placeholder - ideally, confirm role
+    const isStudentView = true; 
 
     return (
         <div className="min-h-screen bg-[#F9F7F7] text-[#112D4E]">

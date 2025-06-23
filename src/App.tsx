@@ -1,26 +1,26 @@
-// src/App.tsx
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
-import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
-import ClassroomPage from './pages/ClassroomPage'; // Import the new page
+import ProtectedRoute from './components/ProtectedRoute'; 
+import ClassroomPage from './pages/ClassroomPage'; 
 import AssignmentPage from './pages/AssignmentPage';
 import AssignmentManagePage from './pages/AssignmentManagePage';
 import SettingsPage from './pages/SettingsPage';
 import GradeSubmissionPage from './pages/GradeSubmissionPage';
 
-// A simple component to handle root redirection logic
+
 const RootRedirect: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>; // Or your main app loader
+    return <div>Loading...</div>; 
   }
 
-  // If authenticated, go to dashboard, otherwise go to login
+  
   return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 };
 

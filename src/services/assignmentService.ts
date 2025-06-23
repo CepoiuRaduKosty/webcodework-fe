@@ -1,4 +1,4 @@
-// src/services/assignmentService.ts
+
 import api from './api';
 import {
     AssignmentBasicDto,
@@ -9,10 +9,10 @@ import {
     CreateVirtualFilePayload,
     UpdateAssignmentPayload,
     GradeSubmissionPayload,
-} from '../types/assignment.ts'; // We'll define these types next
+} from '../types/assignment.ts'; 
 import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
-// === Assignment Management ===
+
 
 export const getAssignmentsForClassroom = async (classroomId: string | number): Promise<AssignmentBasicDto[]> => {
     try {
@@ -25,7 +25,7 @@ export const getAssignmentsForClassroom = async (classroomId: string | number): 
 
 export const createAssignment = async (classroomId: string | number, payload: CreateAssignmentDto): Promise<AssignmentDetailsDto> => {
     try {
-        // Assuming backend returns the created assignment details on 201 Created
+        
         const response = await api.post<AssignmentDetailsDto>(`/api/classrooms/${classroomId}/assignments`, payload);
         return response.data;
     } catch (error: any) {
@@ -42,17 +42,17 @@ export const getAssignmentDetails = async (assignmentId: string | number): Promi
     }
 };
 
-// === Submission Management (Student Perspective) ===
+
 
 export const getMySubmission = async (assignmentId: string | number): Promise<SubmissionDto> => {
     try {
         const response = await api.get<SubmissionDto>(`/api/assignments/${assignmentId}/submissions/my`);
         return response.data;
     } catch (error: any) {
-        // Handle 404 specifically - it means submission not started, not necessarily an error
+        
         if (error.response?.status === 404) {
-             // Return null or a specific indicator instead of throwing an error for 404
-             // Throwing error might be better to handle in component try/catch
+             
+             
              throw { status: 404, message: error.response?.data?.message || 'Submission not started.' };
         }
         throw error.response?.data || new Error('Failed to fetch submission details');
@@ -61,14 +61,14 @@ export const getMySubmission = async (assignmentId: string | number): Promise<Su
 
 export const uploadSubmissionFile = async (assignmentId: string | number, file: File): Promise<SubmittedFileDto> => {
     const formData = new FormData();
-    formData.append('file', file); // Key 'file' must match backend parameter name (IFormFile file)
+    formData.append('file', file); 
 
     try {
         const response = await api.post<SubmittedFileDto>(`/api/assignments/${assignmentId}/submissions/my/files`, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data', // Axios usually sets this with FormData, but explicit is fine
+                'Content-Type': 'multipart/form-data', 
             },
-            // Add onUploadProgress handler if needed
+            
         });
         return response.data;
     } catch (error: any) {
@@ -87,7 +87,7 @@ export const deleteSubmissionFile = async (submissionId: string | number, fileId
 
 export const submitAssignment = async (assignmentId: string | number): Promise<SubmissionDto> => {
      try {
-        // No request body needed for this specific submit action
+        
         const response = await api.post<SubmissionDto>(`/api/assignments/${assignmentId}/submissions/my/submit`);
         return response.data;
     } catch (error: any) {
@@ -106,12 +106,12 @@ export const getSubmissionsForAssignment = async (assignmentId: string | number)
 
 export const getFileContent = async (submissionId: string | number, fileId: string | number): Promise<string> => {
     try {
-        // Expecting plain text response
+        
         const response = await api.get<string>(`/api/submissions/${submissionId}/files/${fileId}/content`, {
-            headers: { 'Accept': 'text/plain' }, // Explicitly ask for text
-            // Important: Tell Axios the expected response type is text
-            // Note: Axios might automatically handle common text types, but this can help
-            // responseType: 'text' // Usually not needed for GET if server sets Content-Type correctly
+            headers: { 'Accept': 'text/plain' }, 
+            
+            
+            
         });
         return response.data;
     } catch (error: any) {
@@ -119,12 +119,12 @@ export const getFileContent = async (submissionId: string | number, fileId: stri
     }
 };
 
-export const updateFileContent = async (submissionId: string | number, fileId: string | number, content: string): Promise<void> => { // Or return updated SubmittedFileDto
+export const updateFileContent = async (submissionId: string | number, fileId: string | number, content: string): Promise<void> => { 
     try {
-        await api.put(`/api/submissions/${submissionId}/files/${fileId}/content`, content, { // Send raw string as data
-            headers: { 'Content-Type': 'text/plain' }, // Set content type of request body
+        await api.put(`/api/submissions/${submissionId}/files/${fileId}/content`, content, { 
+            headers: { 'Content-Type': 'text/plain' }, 
         });
-        // Optionally return updated file metadata if backend provides it
+        
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to save file content');
     }
@@ -143,7 +143,7 @@ export const createVirtualFile = async (assignmentId: string | number, fileName:
 export const updateAssignment = async (
     assignmentId: string | number,
     payload: UpdateAssignmentPayload
-): Promise<AssignmentDetailsDto> => { // Assuming backend returns full details
+): Promise<AssignmentDetailsDto> => { 
     try {
         const response = await api.put<AssignmentDetailsDto>(`/api/assignments/${assignmentId}`, payload);
         return response.data;
@@ -171,30 +171,30 @@ export const downloadSubmittedFile = async (
 ): Promise<void> => {
     try {
         const response = await api.get(
-            // Match your backend route:
+            
             `/api/submissions/${submissionId}/files/${fileId}/download`,
-            // OR if it's just /api/submissions/{submissionId}/files/{fileId}
-            // `/api/submissions/${submissionId}/files/${fileId}`,
+            
+            
             {
-                responseType: 'blob', // IMPORTANT: Tell Axios to expect binary data
+                responseType: 'blob', 
             }
         );
 
-        // Create a Blob from the response data
+        
         const blob = new Blob([response.data], { type: response.headers['content-type'] || 'application/octet-stream' });
 
-        // Create a link element, click it to trigger download, then remove it
+        
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.setAttribute('download', originalFileName); // Use the original filename
+        link.setAttribute('download', originalFileName); 
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(link.href); // Clean up the object URL
+        window.URL.revokeObjectURL(link.href); 
 
     } catch (error: any) {
         console.error("Download File Error:", error.response?.data || error.message);
-        // Handle error - maybe parse blob if it's a JSON error response
+        
         let errorMessage = 'Failed to download file.';
         if (error.response && error.response.data && error.response.data.type === 'application/problem+json') {
              try {
@@ -203,14 +203,14 @@ export const downloadSubmittedFile = async (
                 const errorJson = JSON.parse(errorText);
                 errorMessage = errorJson.detail || errorJson.title || errorMessage;
              } catch (e) {
-                // Failed to parse error blob, use generic message
+                
              }
         } else if (error.response?.data?.message) {
             errorMessage = error.response.data.message;
         } else if (error.message) {
             errorMessage = error.message;
         }
-        alert(errorMessage); // Simple error display, replace with toast or better UI
+        alert(errorMessage); 
         throw new Error(errorMessage);
     }
 };
@@ -220,7 +220,7 @@ export const unsubmitStudentSubmission = async (submissionId: string | number): 
         const response = await api.post<SubmissionDto>(`/api/submissions/${submissionId}/unsubmit`);
         return response.data;
     } catch (error: any) {
-        const errorMessage = error.response?.data?.detail || // For ProblemDetails
+        const errorMessage = error.response?.data?.detail || 
                              error.response?.data?.message ||
                              error.message ||
                              'Failed to unsubmit assignment.';
@@ -240,7 +240,7 @@ export const getSubmissionDetails = async (submissionId: string | number): Promi
 export const gradeSubmission = async (
     submissionId: string | number,
     payload: GradeSubmissionPayload
-): Promise<SubmissionDto> => { // Assuming backend returns the updated submission
+): Promise<SubmissionDto> => { 
     try {
         const response = await api.put<SubmissionDto>(`/api/submissions/${submissionId}/grade`, payload);
         return response.data;

@@ -1,7 +1,7 @@
-// src/pages/SettingsPage.tsx
+
 import React, { useState, FormEvent, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // For user info
+import { useAuth } from '../contexts/AuthContext'; 
 import * as accountService from '../services/accountService';
 import { ChangeUsernamePayload, ChangePasswordPayload } from '../types/account';
 import PasswordStrengthBar from 'react-password-strength-bar';
@@ -12,16 +12,16 @@ import { ProfilePhotoSettings } from '../components/ProfilePhotoSettings';
 const MIN_PASSWORD_LENGTH = 8;
 
 const SettingsPage: React.FC = () => {
-    // const { user, refreshUser } = useAuth(); // Assuming useAuth provides a way to refresh user context
+    
     const { user } = useAuth();
 
-    // Change Username State
+    
     const [newUsername, setNewUsername] = useState(user?.username || '');
     const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
     const [usernameUpdateError, setUsernameUpdateError] = useState<string | null>(null);
     const [usernameUpdateSuccess, setUsernameUpdateSuccess] = useState<string | null>(null);
 
-    // Change Password State
+    
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -29,7 +29,7 @@ const SettingsPage: React.FC = () => {
     const [passwordUpdateError, setPasswordUpdateError] = useState<string | null>(null);
     const [passwordUpdateSuccess, setPasswordUpdateSuccess] = useState<string | null>(null);
 
-    // New Password Validation State
+    
     const [newPasswordScore, setNewPasswordScore] = useState(0);
     const [newPasswordFeedback, setNewPasswordFeedback] = useState<string[]>([]);
     const [isNewPasswordFocused, setIsNewPasswordFocused] = useState(false);
@@ -72,7 +72,7 @@ const SettingsPage: React.FC = () => {
         try {
             await accountService.changeUsername({ newUsername: newUsername.trim() });
             setUsernameUpdateSuccess("Username updated successfully!");
-            // if(refreshUser) await refreshUser(); // Call if useAuth provides a way to refetch user
+            
         } catch (err: any) {
             setUsernameUpdateError(err.message || "Failed to update username.");
         } finally {

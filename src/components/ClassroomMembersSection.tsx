@@ -1,4 +1,4 @@
-// src/components/ClassroomMembersSection.tsx
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { ClassroomDetailsDto, ClassroomMemberDto, ClassroomRole } from "../types/classroom";
 import * as classroomService from '../services/classroomService';
@@ -25,8 +25,8 @@ export const ClassroomMembersSection: React.FC<{
 
     const handlePerformAddMember = async (userIdNum: number, roleToAdd: 'Teacher' | 'Student') => {
         if (!details.id) {
-            setAddMemberError("Classroom ID is missing."); // This error will be shown in the modal
-            return; // Should not proceed
+            setAddMemberError("Classroom ID is missing."); 
+            return; 
         }
         setAddMemberError(null);
         setIsAddingMember(true);
@@ -37,12 +37,12 @@ export const ClassroomMembersSection: React.FC<{
             } else {
                 await classroomService.addStudent(details.id.toString(), payload);
             }
-            setShowAddTeacherModal(false); // Close respective modal on success
+            setShowAddTeacherModal(false); 
             setShowAddStudentModal(false);
             await refreshClassroomData();
         } catch (err: any) {
             setAddMemberError(err.message || `Failed to add ${roleToAdd.toLowerCase()}.`);
-            // Error is shown in the modal, modal remains open.
+            
         } finally {
             setIsAddingMember(false);
         }
@@ -60,8 +60,8 @@ export const ClassroomMembersSection: React.FC<{
     const allMembersSorted = useMemo(() => {
         return [...details.members]
             .sort((a, b) => {
-                // Owners first, then Teachers, then Students, then by username
-                if (a.role !== b.role) return a.role - b.role; // Assumes enum 0, 1, 2
+                
+                if (a.role !== b.role) return a.role - b.role; 
                 return a.username.localeCompare(b.username);
             });
     }, [details.members]);
@@ -72,7 +72,7 @@ export const ClassroomMembersSection: React.FC<{
         );
     }, [allMembersSorted, searchTerm]);
 
-    // Pagination logic
+    
     const totalPages = Math.ceil(filteredMembers.length / ITEMS_PER_PAGE);
     const paginatedMembers = useMemo(() => {
         const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -82,7 +82,7 @@ export const ClassroomMembersSection: React.FC<{
     const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
     const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
 
-    // Reset to page 1 if search term changes and current page becomes invalid
+    
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
@@ -90,30 +90,30 @@ export const ClassroomMembersSection: React.FC<{
 
     const RoleBadge: React.FC<{ role: ClassroomRole }> = ({ role }) => {
         let styles = "text-xs font-medium px-2.5 py-0.5 rounded-full";
-        let roleName = ClassroomRole[role]; // Get string name from enum value
+        let roleName = ClassroomRole[role]; 
 
         if (role === ClassroomRole.Owner) {
-            styles += " bg-[#112D4E] text-[#F9F7F7]"; // Darkest Blue with Lightest text
+            styles += " bg-[#112D4E] text-[#F9F7F7]"; 
         } else if (role === ClassroomRole.Teacher) {
-            styles += " bg-[#3F72AF] text-white"; // Primary Blue with White text
-        } else { // Student
-            // Students might not need a prominent badge or a very subtle one
-            // styles += " bg-[#DBE2EF] text-[#3F72AF]"; // Light Accent with Primary text
-            return null; // Or return null if you don't want to show for students
+            styles += " bg-[#3F72AF] text-white"; 
+        } else { 
+            
+            
+            return null; 
         }
         return <span className={styles}>{roleName}</span>;
     };
 
     const handleRemoveMember = async (memberToRemove: ClassroomMemberDto) => {
-        if (!details.id || !loggedInUserId) return; // Should not happen if button is shown
+        if (!details.id || !loggedInUserId) return; 
 
-        // Prevent removing self with this button (user should use "Leave Classroom")
+        
         if (memberToRemove.userId === loggedInUserId) {
             alert("To leave the classroom, please use the 'Leave Classroom' option.");
             return;
         }
 
-        // Prevent removing owner with this button
+        
         if (memberToRemove.role === ClassroomRole.Owner) {
             alert("Classroom owners cannot be removed this way. Ownership must be transferred or the classroom deleted by the owner.");
             return;
@@ -127,21 +127,21 @@ export const ClassroomMembersSection: React.FC<{
         setRemoveMemberError(null);
         try {
             await classroomService.removeMemberFromClassroom(details.id, memberToRemove.userId);
-            await refreshClassroomData(); // Refresh the member list
-            // TODO: Add success toast
+            await refreshClassroomData(); 
+            
         } catch (err: any) {
             setRemoveMemberError(err.message || "Failed to remove member.");
-            // Optionally display this error more prominently
+            
             alert(`Error removing member: ${err.message}`);
         } finally {
             setRemovingMemberId(null);
         }
     };
 
-    // --- Function to determine if current user can remove a specific member ---
+    
     const canCurrentUserRemoveMember = (memberToRemove: ClassroomMemberDto): boolean => {
         if (!loggedInUserId || loggedInUserId === memberToRemove.userId || memberToRemove.role === ClassroomRole.Owner) {
-            return false; // Cannot remove self or an owner via this button
+            return false; 
         }
         if (details.currentUserRole === ClassroomRole.Owner) {
             return memberToRemove.role === ClassroomRole.Teacher || memberToRemove.role === ClassroomRole.Student;
@@ -270,7 +270,7 @@ export const ClassroomMembersSection: React.FC<{
                 onClose={() => setShowAddTeacherModal(false)}
                 onAddMember={(userId) => handlePerformAddMember(userId, 'Teacher')}
                 roleToAdd="Teacher"
-                classroomId={details.id} // <-- Pass classroomId
+                classroomId={details.id} 
                 isAddingMemberLoading={isAddingMember}
                 addMemberError={addMemberError}
                 clearAddMemberError={() => setAddMemberError(null)}
@@ -280,7 +280,7 @@ export const ClassroomMembersSection: React.FC<{
                 onClose={() => setShowAddStudentModal(false)}
                 onAddMember={(userId) => handlePerformAddMember(userId, 'Student')}
                 roleToAdd="Student"
-                classroomId={details.id} // <-- Pass classroomId
+                classroomId={details.id} 
                 isAddingMemberLoading={isAddingMember}
                 addMemberError={addMemberError}
                 clearAddMemberError={() => setAddMemberError(null)}

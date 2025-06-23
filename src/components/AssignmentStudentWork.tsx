@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react'; // Added React
+import React, { useCallback, useEffect, useState } from 'react'; 
 import { AssignmentDetailsDto, SubmissionDto } from '../types/assignment';
 import * as assignmentService from '../services/assignmentService';
 import { AssignmentWorkStatus } from './AssignmentWorkStatus';
-import { AssignmentStudentEditCode } from './AssigmentStudentEditCode'; // Assuming typo is intentional: AssigmentStudentEditCode
+import { AssignmentStudentEditCode } from './AssigmentStudentEditCode'; 
 import { AssignmentStudentManageFiles } from './AssignmentStudentManageFiles';
-import { FaPaperPlane, FaSpinner, FaExclamationCircle } from 'react-icons/fa'; // Example icons
+import { FaPaperPlane, FaSpinner, FaExclamationCircle } from 'react-icons/fa'; 
 
 export const AssignmentStudentWork: React.FC<{
     assignmentId: string | undefined,

@@ -1,6 +1,6 @@
-// src/services/classroomService.ts
+
 import api from './api';
-import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload, UserSearchResultDto, LeaveClassroomPayload} from '../types/classroom.ts'; // Define these types next
+import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload, UserSearchResultDto, LeaveClassroomPayload} from '../types/classroom.ts'; 
 
 export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   try {
@@ -11,9 +11,9 @@ export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   }
 };
 
-export const createClassroom = async (payload: CreateClassroomPayload): Promise<any> => { // Define specific return type if needed
+export const createClassroom = async (payload: CreateClassroomPayload): Promise<any> => { 
   try {
-    // Assuming backend returns the created classroom on 201 Created
+    
     const response = await api.post('/api/classrooms', payload);
     return response.data;
   } catch (error: any) {
@@ -21,7 +21,7 @@ export const createClassroom = async (payload: CreateClassroomPayload): Promise<
   }
 };
 
-// Assumes backend endpoint GET /api/classrooms/{classroomId}/details exists!
+
 export const getClassroomDetails = async (classroomId: string | number): Promise<ClassroomDetailsDto> => {
   try {
     const response = await api.get<ClassroomDetailsDto>(`/api/classrooms/${classroomId}/details`);
@@ -76,12 +76,12 @@ export const deleteClassroomPhoto = async (classroomId: string | number): Promis
 export const updateClassroomDetails = async (
     classroomId: string | number,
     payload: UpdateClassroomPayload
-): Promise<ClassroomDetailsDto> => { // Assuming backend returns full details or ClassroomDto
+): Promise<ClassroomDetailsDto> => { 
     try {
         const response = await api.put<ClassroomDetailsDto>(`/api/classrooms/${classroomId}`, payload);
         return response.data;
     } catch (error: any) {
-        const errorMessage = error.response?.data?.errors?.Name?.join(', ') || // For ValidationProblemDetails
+        const errorMessage = error.response?.data?.errors?.Name?.join(', ') || 
                              error.response?.data?.errors?.Description?.join(', ') ||
                              error.response?.data?.message ||
                              error.message ||
@@ -103,8 +103,8 @@ export const searchPotentialMembers = async (
     searchTerm: string,
     limit: number = 5
 ): Promise<UserSearchResultDto[]> => {
-    if (!searchTerm || searchTerm.trim().length < 2) { // Basic client-side check
-        return Promise.resolve([]); // Don't search for very short terms
+    if (!searchTerm || searchTerm.trim().length < 2) { 
+        return Promise.resolve([]); 
     }
     try {
         const response = await api.get<UserSearchResultDto[]>(
@@ -125,11 +125,11 @@ export const leaveClassroom = async (
     payload?: LeaveClassroomPayload
 ): Promise<void> => {
     try {
-        // Backend returns 204 No Content on success
-        await api.post(`/api/classrooms/${classroomId}/leave`, payload || {}); // Send empty object if no payload
+        
+        await api.post(`/api/classrooms/${classroomId}/leave`, payload || {}); 
     } catch (error: any) {
-        const errorMessage = error.response?.data?.detail || // For ProblemDetails
-                             error.response?.data?.message || // For custom error objects
+        const errorMessage = error.response?.data?.detail || 
+                             error.response?.data?.message || 
                              error.message ||
                              'Failed to leave classroom.';
         throw new Error(errorMessage);
@@ -141,10 +141,10 @@ export const removeMemberFromClassroom = async (
     memberUserIdToRemove: string | number
 ): Promise<void> => {
     try {
-        // Backend endpoint: DELETE /api/classrooms/{classroomId}/members/{memberUserIdToRemove}
+        
         await api.delete(`/api/classrooms/${classroomId}/members/${memberUserIdToRemove}`);
     } catch (error: any) {
-        const errorMessage = error.response?.data?.detail || // For ProblemDetails
+        const errorMessage = error.response?.data?.detail || 
                              error.response?.data?.message ||
                              error.message ||
                              'Failed to remove member.';

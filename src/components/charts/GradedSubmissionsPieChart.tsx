@@ -1,8 +1,8 @@
-// src/components/charts/GradedSubmissionsPieChart.tsx
+
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
-import { TeacherSubmissionViewDto } from '../../types/assignment'; // Adjust path as needed
+import { TeacherSubmissionViewDto } from '../../types/assignment'; 
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -22,11 +22,11 @@ export const GradedSubmissionsPieChart: React.FC<GradedSubmissionsPieChartProps>
                 label: '# of Submissions',
                 data: [gradedCount, ungradedCount],
                 backgroundColor: [
-                    '#3F72AF', // Palette: Medium Blue (Graded)
-                    '#DBE2EF', // Palette: Light Blue/Gray (Ungraded)
+                    '#3F72AF', 
+                    '#DBE2EF', 
                 ],
                 borderColor: [
-                    '#F9F7F7', // Palette: Lightest (for border)
+                    '#F9F7F7', 
                     '#F9F7F7',
                 ],
                 borderWidth: 2,
@@ -40,12 +40,12 @@ export const GradedSubmissionsPieChart: React.FC<GradedSubmissionsPieChartProps>
         plugins: {
             legend: {
                 position: 'top' as const,
-                labels: { color: '#112D4E' } // Palette: Darkest Blue
+                labels: { color: '#112D4E' } 
             },
             title: {
                 display: true,
                 text: 'Grading Status of Submissions',
-                color: '#112D4E', // Palette: Darkest Blue
+                color: '#112D4E', 
                 font: { size: 16, weight: 'bold' as const }
             },
             tooltip: {

@@ -1,6 +1,6 @@
-// src/types/evaluation.ts
 
-// Corresponds to EvaluationStatus constants on the backend
+
+
 export enum EvaluationStatus {
     Accepted = "ACCEPTED",
     WrongAnswer = "WRONG_ANSWER",
@@ -13,11 +13,11 @@ export enum EvaluationStatus {
     InternalError = "INTERNAL_ERROR"
 }
 
-// Corresponds to OrchestrationTestCaseResult from main backend
+
 export interface FrontendTestCaseResultDto {
     testCaseInputPath: string;
-    testCaseId?: string | null; // Optional ID passed in request
-    status: EvaluationStatus | string; // Use enum for better type safety if possible
+    testCaseId?: string | null; 
+    status: EvaluationStatus | string; 
     stdout?: string | null;
     stderr?: string | null;
     message?: string | null;
@@ -27,7 +27,7 @@ export interface FrontendTestCaseResultDto {
     maximumMemoryException?: boolean | null;
 }
 
-// Corresponds to OrchestrationEvaluateResponse from main backend
+
 export interface FrontendEvaluateResponseDto {
     submissionId?: number;
     evaluatedLanguage?: string;

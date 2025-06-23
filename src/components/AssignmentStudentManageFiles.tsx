@@ -1,13 +1,13 @@
-// src/components/AssignmentStudentManageFiles.tsx
-import React, { ChangeEvent, JSX, useRef, useState } from "react"; // Added React import
+
+import React, { ChangeEvent, JSX, useRef, useState } from "react"; 
 import * as assignmentService from '../services/assignmentService';
 import { SubmissionDto, SubmittedFileDto } from "../types/assignment";
 import {
     FaFileUpload, FaTrashAlt, FaSpinner, FaExclamationCircle,
-    FaFilePdf, FaFileWord, FaFileImage, FaFileAlt, FaFileCode // Example file type icons
+    FaFilePdf, FaFileWord, FaFileImage, FaFileAlt, FaFileCode 
 } from 'react-icons/fa';
 
-// Helper to get a file type icon
+
 const getFileTypeIcon = (fileName: string): JSX.Element => {
     const extension = fileName.split('.').pop()?.toLowerCase();
     if (extension === 'pdf') return <FaFilePdf className="text-red-500 mr-2 flex-shrink-0" size={18} />;
@@ -40,7 +40,7 @@ export const AssignmentStudentManageFiles: React.FC<{
         try {
             await assignmentService.downloadSubmittedFile(mySubmission.id, file.id, file.fileName);
         } catch (error) {
-            // Error is already handled and alerted in the service function for this example
+            
             console.error("Download trigger failed:", error);
         } finally {
             setDownloadingFileId(null);
@@ -65,7 +65,7 @@ export const AssignmentStudentManageFiles: React.FC<{
             setSelectedFile(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
             await callbackRefetchFiles();
-            // TODO: Add success toast for upload
+            
         } catch (err: any) {
             setUploadError(err.message || 'File upload failed.');
         } finally {
@@ -81,9 +81,9 @@ export const AssignmentStudentManageFiles: React.FC<{
         try {
             await assignmentService.deleteSubmissionFile(mySubmission.id, fileId);
             await callbackRefetchFiles();
-            // TODO: Add success toast for delete
+            
         } catch (err: any) {
-            setUploadError(err.message || 'Failed to delete file.'); // Reusing uploadError for simplicity
+            setUploadError(err.message || 'Failed to delete file.'); 
         } finally {
             setDeletingFileId(null);
         }

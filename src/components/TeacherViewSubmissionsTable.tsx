@@ -1,4 +1,4 @@
-// src/components/TeacherViewSubmissionsTable.tsx
+
 import React, { useMemo, useState, useEffect, JSX } from "react";
 import { AssignmentDetailsDto, TeacherSubmissionViewDto } from "../types/assignment";
 import { format, parseISO, isValid } from "date-fns";
@@ -9,11 +9,11 @@ import {
     FaChevronLeft, FaChevronRight,
     FaUndo
 } from 'react-icons/fa';
-import { EvaluationStatus } from "../types/evaluation"; // Assuming this enum is available
+import { EvaluationStatus } from "../types/evaluation"; 
 import * as assignmentService from '../services/assignmentService';
 import { useNavigate } from "react-router-dom";
 
-// --- Helper Functions (formatDate, getStatusInfo - ensure they are defined as in previous examples) ---
+
 const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return '–';
     const date = parseISO(dateString);
@@ -30,9 +30,9 @@ const getStatusInfo = (statusKey: string): {
     const normalizedStatus = statusKey.toString().toUpperCase();
     let displayLabel = statusKey.toString().replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
     displayLabel = displayLabel.charAt(0).toUpperCase() + displayLabel.slice(1).toLowerCase();
-    if (normalizedStatus === "NOT SUBMITTED") displayLabel = "Not Submitted"; // Specific override
+    if (normalizedStatus === "NOT SUBMITTED") displayLabel = "Not Submitted"; 
     switch (normalizedStatus) {
-        case EvaluationStatus.Accepted.toUpperCase(): // Or direct string "ACCEPTED"
+        case EvaluationStatus.Accepted.toUpperCase(): 
             return { bgColor: 'bg-blue-100', textColor: 'text-[#3F72AF]', icon: <FaCheckCircle className="text-[#3F72AF]" />, label: displayLabel };
         case EvaluationStatus.WrongAnswer.toUpperCase():
             return { bgColor: 'bg-red-100', textColor: 'text-red-700', icon: <FaTimesCircle className="text-red-600" />, label: displayLabel };
@@ -42,9 +42,9 @@ const getStatusInfo = (statusKey: string): {
             return { bgColor: 'bg-red-100', textColor: 'text-red-700', icon: <FaCog className="text-red-600" />, label: displayLabel };
         case EvaluationStatus.TimeLimitExceeded.toUpperCase():
             return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: <FaHourglassHalf className="text-yellow-600" />, label: displayLabel };
-        case EvaluationStatus.MemoryLimitExceeded.toUpperCase(): // Added
+        case EvaluationStatus.MemoryLimitExceeded.toUpperCase(): 
             return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: <FaMemory className="text-yellow-600" />, label: displayLabel };
-        case "SUBMITTED": // Handling "Submitted" and "Submitted (Late)"
+        case "SUBMITTED": 
         case "SUBMITTED (LATE)":
             return { bgColor: 'bg-blue-100', textColor: 'text-[#3F72AF]', icon: <FaCheckCircle className="text-[#3F72AF]" />, label: displayLabel };
         case "GRADED":
@@ -95,7 +95,7 @@ export const TeacherViewSubmissionsTable: React.FC<TeacherViewSubmissionsTablePr
     }, [filteredSubmissions, currentPage]);
 
     useEffect(() => {
-        setCurrentPage(1); // Reset to page 1 when search term or base submissions change
+        setCurrentPage(1); 
     }, [searchTerm, submissions]);
 
     const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
@@ -106,7 +106,7 @@ export const TeacherViewSubmissionsTable: React.FC<TeacherViewSubmissionsTablePr
             alert(`No submission to view for ${studentUsername}.`);
             return;
         }
-        navigate(`/submissions/${submissionId}/grade`); // Navigate to the grading page
+        navigate(`/submissions/${submissionId}/grade`); 
     };
 
     if (isLoadingSubmissions) {
@@ -139,11 +139,11 @@ export const TeacherViewSubmissionsTable: React.FC<TeacherViewSubmissionsTablePr
         setUnsubmitError(null);
         try {
             await assignmentService.unsubmitStudentSubmission(submissionId);
-            await refreshSubmissions(); // Refresh the entire list from parent
-            // TODO: Add a success toast: `${studentUsername}'s submission has been reverted.`
+            await refreshSubmissions(); 
+            
         } catch (err: any) {
             setUnsubmitError(err.message || "Failed to unsubmit.");
-            alert(`Error: ${err.message || "Failed to unsubmit."}`); // Simple alert for now
+            alert(`Error: ${err.message || "Failed to unsubmit."}`); 
         } finally {
             setUnsubmittingSubmissionId(null);
         }

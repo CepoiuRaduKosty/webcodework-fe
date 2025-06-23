@@ -1,4 +1,4 @@
-// src/pages/RegisterPage.tsx
+
 import React, { useState, FormEvent, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/authService';
@@ -21,7 +21,7 @@ const RegisterPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Clear messages when fields change
+  
   useEffect(() => {
     setError(null);
     setSuccessMessage(null);
@@ -30,7 +30,7 @@ const RegisterPage: React.FC = () => {
   useEffect(() => {
     if (password) {
       const analysis = zxcvbn(password);
-      setPasswordScore(analysis.score); // Score from 0 (worst) to 4 (best)
+      setPasswordScore(analysis.score); 
       setPasswordFeedback(analysis.feedback?.suggestions || []);
     } else {
       setPasswordScore(0);
@@ -46,8 +46,8 @@ const RegisterPage: React.FC = () => {
     return {
       lengthMet,
       passwordsMatch,
-      strengthMet, // Added strength check
-      allValid: lengthMet && passwordsMatch && strengthMet, // Basic form validity
+      strengthMet, 
+      allValid: lengthMet && passwordsMatch && strengthMet, 
     };
   }, [password, confirmPassword, passwordScore]);
 
@@ -67,7 +67,7 @@ const RegisterPage: React.FC = () => {
       setError("Passwords do not match.");
       return;
     }
-    if (passwordScore < 2) { // 0: Risky, 1: Weak, 2: Fair, 3: Good, 4: Strong
+    if (passwordScore < 2) { 
         setError("Password is too weak. Try making it longer or adding more variety.");
         return;
     }
@@ -211,7 +211,7 @@ const RegisterPage: React.FC = () => {
           <div>
             <button
               type="submit"
-              disabled={isLoading || !!successMessage || !passwordCriteria.allValid} // Disable if criteria not met
+              disabled={isLoading || !!successMessage || !passwordCriteria.allValid} 
               className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#3F72AF] hover:bg-[#112D4E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3F72AF] disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {isLoading ? 'Creating account...' : (successMessage ? 'Registered!' : 'Create Account')}

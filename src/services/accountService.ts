@@ -9,10 +9,10 @@ export const changeUsername = async (payload: ChangeUsernamePayload): Promise<vo
     try {
         await api.put(`${API_BASE_PATH}/username`, payload);
     } catch (error: any) {
-        const errorMessage = error.response?.data?.errors?.NewUsername?.join(', ') || // For ValidationProblemDetails
-                             error.response?.data?.NewUsername?.join(', ') || // For manual ModelState errors
-                             error.response?.data?.message ||                 // For custom error objects
-                             error.message ||                                 // Fallback
+        const errorMessage = error.response?.data?.errors?.NewUsername?.join(', ') || 
+                             error.response?.data?.NewUsername?.join(', ') || 
+                             error.response?.data?.message ||                 
+                             error.message ||                                 
                              'Failed to change username.';
         throw new Error(errorMessage);
     }
@@ -39,12 +39,12 @@ export const changePassword = async (payload: ChangePasswordPayload): Promise<vo
 
 export const uploadProfilePhoto = async (photoFile: File): Promise<UserProfileDto> => {
     const formData = new FormData();
-    formData.append('photoFile', photoFile); // Key must match backend parameter name
+    formData.append('photoFile', photoFile); 
 
     try {
         const response = await api.post<UserProfileDto>(PHOTO_API_BASE_PATH, formData, {
             headers: {
-                'Content-Type': undefined, // Let Axios set for FormData
+                'Content-Type': undefined, 
             },
         });
         return response.data;

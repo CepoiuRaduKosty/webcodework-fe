@@ -1,4 +1,4 @@
-// src/pages/LoginPage.tsx
+
 import React, { useState, FormEvent, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,13 +13,13 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-        // Basic client-side validation (consider a library like react-hook-form for more)
+        
         alert('Please enter both username and password.');
         return;
     }
     const credentials: LoginPayload = { username, password };
     await login(credentials);
-    // Navigation is handled inside the login function upon success
+    
   };
 
   return (

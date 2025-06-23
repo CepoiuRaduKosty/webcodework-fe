@@ -1,4 +1,4 @@
-// src/components/AddMemberModal.tsx
+
 import React, { useState, FormEvent, useEffect }  from 'react';
 import { Modal } from '../Modal';
 import { UserSearchResultDto } from '../../types/classroom'; 

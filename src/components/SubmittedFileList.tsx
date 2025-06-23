@@ -1,7 +1,7 @@
-// src/components/SubmittedFilesList.tsx
+
 import React, { JSX, useState } from 'react';
 import { SubmittedFileDto, SubmissionDto } from '../types/assignment';
-import * as assignmentService from '../services/assignmentService'; // For download
+import * as assignmentService from '../services/assignmentService'; 
 import { FaFilePdf, FaFileWord, FaFileImage, FaFileAlt, FaFileCode, FaDownload, FaSpinner } from 'react-icons/fa';
 
 const getFileTypeIcon = (fileName: string): JSX.Element => {
@@ -16,9 +16,9 @@ const getFileTypeIcon = (fileName: string): JSX.Element => {
 };
 
 interface SubmittedFilesListProps {
-    submission: SubmissionDto | null; // Pass the whole submission for context if needed
+    submission: SubmissionDto | null; 
     files: SubmittedFileDto[];
-    // Removed canDelete and onDeleteFile as this is view/grade context primarily
+    
 }
 
 export const SubmittedFilesList: React.FC<SubmittedFilesListProps> = ({ submission, files }) => {

@@ -1,9 +1,9 @@
-// src/components/TestCaseParallelEditor.tsx
-import React, { useCallback, useEffect, useState } from "react"; // Added React import
+
+import React, { useCallback, useEffect, useState } from "react"; 
 import { TestCaseListDto } from "../types/testcase";
 import * as testcaseService from '../services/testcaseService';
 import { Editor } from "@monaco-editor/react";
-import { FaSave, FaSpinner, FaExclamationCircle } from 'react-icons/fa'; // For Save button and status
+import { FaSave, FaSpinner, FaExclamationCircle } from 'react-icons/fa'; 
 
 export const TestCaseParallelEditor: React.FC<{
     editingTestCase: TestCaseListDto;
@@ -17,10 +17,10 @@ export const TestCaseParallelEditor: React.FC<{
     const [isFetchingContent, setIsFetchingContent] = useState(false);
 
     const loadContents = useCallback(async () => {
-        if (!editingTestCase?.id) return; // Guard clause
+        if (!editingTestCase?.id) return; 
 
         setIsFetchingContent(true);
-        setFetchContentError(null); // Clear previous errors
+        setFetchContentError(null); 
         setInputEditorContent('');
         setOutputEditorContent('');
         if (isEditable) {
@@ -41,7 +41,7 @@ export const TestCaseParallelEditor: React.FC<{
             } else {
                 const reason = inputResult.reason as any;
                 errors.push(`Failed to load input: ${reason?.message || 'Unknown error'}`);
-                setInputEditorContent("Error loading content."); // Placeholder
+                setInputEditorContent("Error loading content."); 
             }
 
             if (outputResult.status === 'fulfilled') {
@@ -49,23 +49,23 @@ export const TestCaseParallelEditor: React.FC<{
             } else {
                 const reason = outputResult.reason as any;
                 errors.push(`Failed to load output: ${reason?.message || 'Unknown error'}`);
-                setOutputEditorContent("Error loading content."); // Placeholder
+                setOutputEditorContent("Error loading content."); 
             }
 
             if (errors.length > 0) {
                 setFetchContentError(errors.join('; '));
             }
 
-        } catch (err: any) { // Should be caught by Promise.allSettled, but as a fallback
+        } catch (err: any) { 
             setFetchContentError(err.message || 'Failed to load test case content.');
         } finally {
             setIsFetchingContent(false);
         }
-    }, [editingTestCase?.id, isEditable]); // Depend on ID to refetch if different test case is edited
+    }, [editingTestCase?.id, isEditable]); 
 
     useEffect(() => {
         loadContents();
-    }, [loadContents]); // loadContents will re-run if editingTestCase.id changes
+    }, [loadContents]); 
 
     const handleSaveInput = async () => {
         if (!editingTestCase?.id) return;
@@ -76,7 +76,7 @@ export const TestCaseParallelEditor: React.FC<{
             setTimeout(() => { setSaveInputStatus('idle'); }, 2500);
         } catch (err: any) {
             setSaveInputStatus('error');
-            // setFetchContentError might be too broad, could use a specific saveError state
+            
             setFetchContentError(`Input Save Error: ${err.message || 'Failed to save'}`);
         }
     };
@@ -98,7 +98,7 @@ export const TestCaseParallelEditor: React.FC<{
         if (status === 'saving') return <span className="text-[#3F72AF] animate-pulse font-medium">Saving...</span>;
         if (status === 'saved') return <span className="text-green-600 font-medium">Saved!</span>;
         if (status === 'error') return <span className="text-red-600 font-medium">Save Error!</span>;
-        return null; // Idle
+        return null; 
     };
 
     return (
@@ -140,8 +140,8 @@ export const TestCaseParallelEditor: React.FC<{
                         <div className="flex-grow">
                             <Editor
                                 key={`${editingTestCase.id}-output`}
-                                height="45vh" // Adjust height as needed for inline display
-                                language="plaintext" // Or detect based on filename if possible
+                                height="45vh" 
+                                language="plaintext" 
                                 theme="vs-dark"
                                 value={`${inputEditorContent}`}
                                 onChange={(v) => { setInputEditorContent(v ?? ''); if (saveInputStatus !== 'idle') setSaveInputStatus('idle'); }}
@@ -171,7 +171,7 @@ export const TestCaseParallelEditor: React.FC<{
                         <div className="flex-grow">
                             <Editor
                                 key={`${editingTestCase.id}-input`}
-                                height="45vh" // Match input editor height
+                                height="45vh" 
                                 language="plaintext"
                                 theme="vs-dark"
                                 value={`${outputEditorContent}`}

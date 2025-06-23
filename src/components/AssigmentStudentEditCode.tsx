@@ -12,7 +12,7 @@ import { FaCode, FaExclamationCircle, FaPlay, FaSave, FaSpinner, FaTimes } from 
 export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefined, mySubmission: SubmissionDto | null, callbackRefreshSubmittedFiles: () => Promise<void> }> = ({ assignmentId, mySubmission, callbackRefreshSubmittedFiles }) => {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [editorContent, setEditorContent] = useState<string>('');
-    const [editingFile, setEditingFile] = useState<SubmittedFileDto | null>(null); // Store file metadata
+    const [editingFile, setEditingFile] = useState<SubmittedFileDto | null>(null); 
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [isEditorLoading, setIsEditorLoading] = useState(false);
     const [editorError, setEditorError] = useState<string | null>(null);
@@ -198,7 +198,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                         id="languageSelect"
                         value={selectedLanguage}
                         onChange={(e) => setSelectedLanguage(e.target.value)}
-                        disabled={isEditorOpen || isEvaluating} // Also disable if evaluating
+                        disabled={isEditorOpen || isEvaluating} 
                         className="mt-1 block w-full sm:w-auto pl-3 pr-10 py-2.5 text-base border-[#DBE2EF] bg-white text-[#112D4E] focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] sm:text-sm rounded-md shadow-sm"
                     >
                         {SUPPORTED_LANGUAGES.map(lang => (
@@ -230,7 +230,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                         {isEditorLoading ? 'Loading...' : (solutionFileExists ? `Edit ${SOLUTION_FILENAME}` : `Start ${SOLUTION_FILENAME}`)}
                     </button>
 
-                    {solutionFileExists && !mySubmission?.submittedAt && ( // Condition to show Evaluate button
+                    {solutionFileExists && !mySubmission?.submittedAt && ( 
                         <button
                             onClick={handleEvaluateSolution}
                             disabled={isEvaluating || isEditorOpen || !isHubConnected}
@@ -281,7 +281,7 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                         <Editor
                             height="60vh"
                             language={monacoLanguage}
-                            theme="vs-dark" // Standard dark theme for Monaco, usually looks good
+                            theme="vs-dark" 
                             value={editorContent}
                             onChange={handleEditorChange}
                             options={{
@@ -289,8 +289,8 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                                 fontSize: 14,
                                 scrollBeyondLastLine: false,
                                 automaticLayout: true,
-                                wordWrap: "on", // Good for instructions if used here
-                                readOnly: isSaving || saveStatus === 'saving', // Prevent editing while saving
+                                wordWrap: "on", 
+                                readOnly: isSaving || saveStatus === 'saving', 
                             }}
                         />
                     )}

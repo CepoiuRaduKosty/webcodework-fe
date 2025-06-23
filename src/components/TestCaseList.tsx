@@ -1,5 +1,5 @@
-// src/components/TestCaseList.tsx
-import React, { useState } from "react"; // Added React
+
+import React, { useState } from "react"; 
 import { AssignmentDetailsDto } from "../types/assignment";
 import { TestCaseListDto } from "../types/testcase";
 import { format, parseISO, isValid } from "date-fns";
@@ -7,12 +7,12 @@ import * as testcaseService from '../services/testcaseService';
 import { TestCaseParallelEditor } from './TestCaseParallelEditor';
 import { FaEdit, FaTrashAlt, FaEye, FaEyeSlash, FaSpinner, FaLock, FaUnlock, FaTimesCircle } from 'react-icons/fa';
 
-// Format Dates Helper
+
 const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
     const date = parseISO(dateString);
     if (!isValid(date)) return "Invalid Date";
-    try { return format(date, 'MMM d, yyyy'); } catch { return 'Invalid Date'; } // Simpler date format
+    try { return format(date, 'MMM d, yyyy'); } catch { return 'Invalid Date'; } 
 };
 
 export const TestCaseList: React.FC<{
@@ -36,10 +36,10 @@ export const TestCaseList: React.FC<{
         try {
             await testcaseService.deleteTestCase(assignmentDetails.id, testCaseId);
             await requestRefresh();
-            // TODO: Success toast
+            
         } catch (err: any) {
             setListError(err.message || 'Failed to delete test case.');
-            // alert(`Error deleting test case: ${err.message || 'Unknown error'}`);
+            
         } finally {
             setDeletingTestCaseId(null);
         }
@@ -51,10 +51,10 @@ export const TestCaseList: React.FC<{
         setListError(null);
         try {
             await testcaseService.updateTestCasePrivacy(tc.id, !tc.isPrivate);
-            await requestRefresh(); // Refresh the entire list to get updated data
+            await requestRefresh(); 
         } catch (err: any) {
             setListError(err.message || `Failed to update privacy for ${tc.inputFileName}.`);
-            // alert(`Error updating privacy: ${err.message || 'Unknown error'}`);
+            
         } finally {
             setUpdatingPrivacyId(null);
         }
@@ -63,7 +63,7 @@ export const TestCaseList: React.FC<{
     const handleToggleEditorForItem = (testCaseId: number) => {
         setOpenEditors(prevOpenEditors => ({
             ...prevOpenEditors,
-            [testCaseId]: !prevOpenEditors[testCaseId] // Toggle the state for this specific ID
+            [testCaseId]: !prevOpenEditors[testCaseId] 
         }));
     };
 
@@ -116,7 +116,7 @@ export const TestCaseList: React.FC<{
                                 )}
 
                                 <button
-                                    onClick={() => handleToggleEditorForItem(tc.id)} // Use new handler
+                                    onClick={() => handleToggleEditorForItem(tc.id)} 
                                     className={`w-full sm:w-auto flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1
                                         ${isCurrentlyEditing ? 'bg-[#112D4E] hover:bg-opacity-90 focus:ring-[#112D4E]' : 'bg-[#3F72AF] hover:bg-[#112D4E] focus:ring-[#3F72AF]'}
                                         ${isCurrentlyDeleting || isCurrentlyUpdatingPrivacy ? 'opacity-50 cursor-not-allowed' : ''}`}

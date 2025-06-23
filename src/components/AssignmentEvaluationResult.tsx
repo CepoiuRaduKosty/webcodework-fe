@@ -1,7 +1,7 @@
-// src/components/AssignmentEvaluationResult.tsx
+
 import React, { JSX, useState } from 'react';
 import { EvaluationStatus, FrontendEvaluateResponseDto } from "../types/evaluation";
-import { FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaCog, FaHourglassHalf, FaMemory, FaFire, FaQuestionCircle, FaEyeSlash, FaEye, FaExclamationCircle, FaTerminal, FaTools } from 'react-icons/fa'; // Added more icons
+import { FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaCog, FaHourglassHalf, FaMemory, FaFire, FaQuestionCircle, FaEyeSlash, FaEye, FaExclamationCircle, FaTerminal, FaTools } from 'react-icons/fa'; 
 
 
 const getStatusInfo = (status: EvaluationStatus | string): {
@@ -11,12 +11,12 @@ const getStatusInfo = (status: EvaluationStatus | string): {
     icon: JSX.Element,
     label: string
 } => {
-    const normalizedStatus = status.toString().toUpperCase(); // Normalize for comparison with enum keys
+    const normalizedStatus = status.toString().toUpperCase(); 
     let displayLabel: string;
 
-    // Determine the human-readable label based on the status
+    
     switch (normalizedStatus) {
-        case EvaluationStatus.Accepted.toUpperCase(): // Comparing with uppercase version of enum value
+        case EvaluationStatus.Accepted.toUpperCase(): 
             displayLabel = "Accepted";
             break;
         case EvaluationStatus.WrongAnswer.toUpperCase():
@@ -35,24 +35,24 @@ const getStatusInfo = (status: EvaluationStatus | string): {
             displayLabel = "Memory Limit Exceeded";
             break;
         case EvaluationStatus.FileError.toUpperCase():
-            displayLabel = "File Processing Error"; // Slightly more descriptive
+            displayLabel = "File Processing Error"; 
             break;
         case EvaluationStatus.LanguageNotSupported.toUpperCase():
             displayLabel = "Language Not Supported";
             break;
         case EvaluationStatus.InternalError.toUpperCase():
-            displayLabel = "System Error"; // More user-friendly than "Internal Error"
+            displayLabel = "System Error"; 
             break;
         default:
-            // Fallback for unknown or custom string statuses
-            displayLabel = status.toString().replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim(); // Generic formatting
-            displayLabel = displayLabel.charAt(0).toUpperCase() + displayLabel.slice(1).toLowerCase(); // Title Case
+            
+            displayLabel = status.toString().replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim(); 
+            displayLabel = displayLabel.charAt(0).toUpperCase() + displayLabel.slice(1).toLowerCase(); 
             if (!displayLabel) displayLabel = "Unknown Status";
             break;
     }
 
     switch (normalizedStatus) {
-        case EvaluationStatus.Accepted: // String value e.g. "ACCEPTED"
+        case EvaluationStatus.Accepted: 
             return { bgColor: 'bg-blue-50', textColor: 'text-[#3F72AF]', borderColor: 'border-[#3F72AF]', icon: <FaCheckCircle className="text-[#3F72AF]" />, label: displayLabel };
         case EvaluationStatus.WrongAnswer:
             return { bgColor: 'bg-red-50', textColor: 'text-red-700', borderColor: 'border-red-600', icon: <FaTimesCircle className="text-red-500" />, label: displayLabel };
@@ -68,14 +68,14 @@ const getStatusInfo = (status: EvaluationStatus | string): {
         case EvaluationStatus.InternalError:
         case EvaluationStatus.LanguageNotSupported:
             return { bgColor: 'bg-red-50', textColor: 'text-red-700', borderColor: 'border-red-600', icon: <FaFire className="text-red-500" />, label: displayLabel };
-        default: // For unknown statuses or custom string statuses
+        default: 
             return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', borderColor: 'border-gray-400', icon: <FaQuestionCircle className="text-gray-500" />, label: displayLabel };
     }
 };
 
 const CollapsibleOutput: React.FC<{ title: string; content?: string | null; language?: string }> = ({ title, content, language = "plaintext" }) => {
     const [isOpen, setIsOpen] = useState(false);
-    // Allow showing if content is an empty string (e.g. stdout was empty but present)
+    
     if (content == null) return null;
 
     return (
@@ -128,7 +128,7 @@ export const AssignmentEvaluationResult: React.FC<{
         return <div className="p-4 text-center text-gray-500 italic">No evaluation results to display yet.</div>;
     }
 
-    // Generate a more human-readable overall status message
+    
     let overallStatusMessage = evaluationResult.overallStatus;
     let overallStatusStyles = getStatusInfo(evaluationResult.overallStatus as EvaluationStatus);
 
@@ -139,19 +139,19 @@ export const AssignmentEvaluationResult: React.FC<{
         overallStatusMessage = "All Tests Passed!";
     } else if (evaluationResult.results.some(r => r.status !== EvaluationStatus.Accepted)) {
         overallStatusMessage = "Some Tests Failed";
-        // Keep overallStatusStyles as is, or choose a specific one for partial success like yellow
+        
         if (evaluationResult.overallStatus !== EvaluationStatus.WrongAnswer &&
             evaluationResult.overallStatus !== EvaluationStatus.RuntimeError &&
             evaluationResult.overallStatus !== EvaluationStatus.TimeLimitExceeded &&
             evaluationResult.overallStatus !== EvaluationStatus.MemoryLimitExceeded) {
-            // If overall status is generic like "CompletedWithIssues" but not a specific failure type
-            overallStatusStyles = getStatusInfo(EvaluationStatus.WrongAnswer); // Default to WA style for issues
+            
+            overallStatusStyles = getStatusInfo(EvaluationStatus.WrongAnswer); 
         }
     }
 
 
     return (
-        // Main container for results, using white background as it's likely on a lighter page bg
+        
         <div className="p-4 md:p-6 bg-white border border-[#DBE2EF] rounded-xl shadow-lg space-y-6 text-[#112D4E]">
 
             {/* Overall Summary - No separate box, integrated */}
@@ -175,7 +175,7 @@ export const AssignmentEvaluationResult: React.FC<{
                             <span className={`block px-4 py-1.5 rounded-md text-xl font-semibold 
                             ${evaluationResult.compilationSuccess && evaluationResult.overallStatus === EvaluationStatus.Accepted ? 'bg-[#3F72AF] text-white' :
                                     !evaluationResult.compilationSuccess || evaluationResult.overallStatus === EvaluationStatus.CompileError || evaluationResult.overallStatus === EvaluationStatus.InternalError || evaluationResult.overallStatus === EvaluationStatus.FileError ? 'bg-[#3F72AF] text-white' :
-                                        'bg-[#3F72AF] text-white' // For partial scores or issues
+                                        'bg-[#3F72AF] text-white' 
                                 }`}>
                                 {evaluationResult.pointsObtained} / {evaluationResult.totalPossiblePoints}
                             </span>
@@ -199,7 +199,7 @@ export const AssignmentEvaluationResult: React.FC<{
                     <h5 className="text-lg font-semibold text-[#112D4E] border-b border-[#DBE2EF] pb-2">Test Case Breakdown:</h5>
                     {evaluationResult.results.map((res, index) => {
                         const tcStatusInfo = getStatusInfo(res.status as EvaluationStatus);
-                        // Use testCaseName if available, otherwise fallback
+                        
                         const displayName = res.testCaseName || res.testCaseId || `Test Case #${index + 1}`;
 
                         return (
@@ -220,7 +220,7 @@ export const AssignmentEvaluationResult: React.FC<{
                                 {res.message && !res.isPrivate && (
                                     <p className={`text-xs mt-2 pl-7 italic ${tcStatusInfo.textColor}`}>{res.message}</p>
                                 )}
-                                {res.maximumMemoryException && ( // Assuming this is a boolean
+                                {res.maximumMemoryException && ( 
                                     <p className={`text-xs mt-1 pl-7 font-semibold ${getStatusInfo(EvaluationStatus.MemoryLimitExceeded).textColor} flex items-center`}>
                                         <FaMemory className="mr-1.5" /> (Exceeded Memory Limit)
                                     </p>
@@ -231,7 +231,7 @@ export const AssignmentEvaluationResult: React.FC<{
                                         <FaEyeSlash className="mr-1.5" /> Detailed output is hidden for this private test case.
                                     </p>
                                 ) : (
-                                    // Only show STDOUT/STDERR collapsible if not private
+                                    
                                     <div className="pl-7 mt-1">
                                         {(res.stdout || res.stdout === "") && <CollapsibleOutput title="STDOUT" content={res.stdout} />}
                                         {(res.stderr || res.stderr === "") && <CollapsibleOutput title="STDERR" content={res.stderr} />}

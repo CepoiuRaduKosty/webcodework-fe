@@ -1,4 +1,4 @@
-// src/pages/AssignmentManagePage.tsx
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { AssignmentDetailsDto, TeacherSubmissionViewDto } from '../types/assignment';
@@ -34,10 +34,10 @@ const AssignmentManagePage: React.FC = () => {
         setIsLoadingSubmissions(true);
         setError(null);
         try {
-            // Fetch in parallel
+            
             const [assignmentData, submissionsData] = await Promise.all([
                 assignmentService.getAssignmentDetails(assignmentId),
-                assignmentService.getSubmissionsForAssignment(assignmentId) // Fetch submissions here
+                assignmentService.getSubmissionsForAssignment(assignmentId) 
             ]);
 
             setAssignmentDetails(assignmentData);
@@ -53,7 +53,7 @@ const AssignmentManagePage: React.FC = () => {
             setIsLoadingDetails(false);
             setIsLoadingSubmissions(false);
         }
-    }, [assignmentId, user?.id]); // Added user?.id
+    }, [assignmentId, user?.id]); 
 
     useEffect(() => {
         fetchPageData();
@@ -61,8 +61,8 @@ const AssignmentManagePage: React.FC = () => {
 
     const isLoading = isLoadingDetails;
 
-    if (isLoading && !assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center">Loading assignment...</div>; // Initial load
-    if (error && !assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center text-red-600">Error: {error}</div>; // Error loading assignment details
+    if (isLoading && !assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center">Loading assignment...</div>; 
+    if (error && !assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center text-red-600">Error: {error}</div>; 
     if (!assignmentDetails) return <div className="container mx-auto mt-10 p-6 text-center">Assignment not found.</div>;
 
     return (

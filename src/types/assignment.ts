@@ -1,41 +1,41 @@
-// src/types/assignment.ts
 
-// Matches backend DTO: CreateAssignmentDto
+
+
 export interface CreateAssignmentDto {
     title: string;
     instructions?: string;
-    dueDate?: string | null; // Use ISO string format for dates or Date object
+    dueDate?: string | null; 
     maxPoints?: number | null;
     isCodeAssignment: boolean;
 }
 
-// Matches backend DTO: AssignmentBasicDto
+
 export interface AssignmentBasicDto {
     id: number;
     title: string;
-    createdAt: string; // ISO date string
-    dueDate?: string | null; // ISO date string
+    createdAt: string; 
+    dueDate?: string | null; 
     maxPoints?: number | null;
-    submissionStatus?: string | null; // "Not Submitted", "Submitted", "Late", "Graded", "In Progress" etc.
+    submissionStatus?: string | null; 
 }
 
-// Matches backend DTO: AssignmentDetailsDto
+
 export interface AssignmentDetailsDto extends AssignmentBasicDto {
     instructions?: string | null;
     createdById: number;
     createdByUsername: string;
     classroomId: number;
     isCodeAssignment: boolean;
-    // Add currentUserRole if backend provides it, otherwise infer from context/other calls
+    
 }
 
-// Matches backend DTO: SubmittedFileDto
+
 export interface SubmittedFileDto {
     id: number;
     fileName: string;
     contentType: string;
     fileSize: number;
-    uploadedAt: string; // ISO date string
+    uploadedAt: string; 
 }
 
 export interface SubmissionDto {
@@ -67,12 +67,12 @@ export interface GradeSubmissionPayload {
 export interface TeacherSubmissionViewDto {
     studentId: number;
     studentUsername: string;
-    submissionId?: number | null; // Nullable if not submitted
-    submittedAt?: string | null; // ISO date string
+    submissionId?: number | null; 
+    submittedAt?: string | null; 
     isLate: boolean;
     grade?: number | null;
     hasFiles: boolean;
-    status: string; // "Not Submitted", "Submitted", "Late", "Graded", "In Progress"
+    status: string; 
     profilePhotoUrl?: string | null;
 }
 

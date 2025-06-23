@@ -1,9 +1,9 @@
-// src/components/modals/AddTestCaseModal.tsx
-import React, { FormEvent, useEffect, useState } from "react"; // Added React import
-import { Modal } from "../Modal"; // Assuming Modal component path
+
+import React, { FormEvent, useEffect, useState } from "react"; 
+import { Modal } from "../Modal"; 
 import { AssignmentDetailsDto } from "../../types/assignment";
-import * as testcaseService from '../../services/testcaseService'; // Assuming correct path
-import { FaPlus, FaSpinner, FaExclamationCircle } from "react-icons/fa"; // For button icon
+import * as testcaseService from '../../services/testcaseService'; 
+import { FaPlus, FaSpinner, FaExclamationCircle } from "react-icons/fa"; 
 
 export const AddTestCaseModal: React.FC<{
     assignmentDetails: AssignmentDetailsDto,
@@ -24,24 +24,24 @@ export const AddTestCaseModal: React.FC<{
         setNewTestCaseMaxTimeMs('2000');
         setNewTestCaseMaxRamMB('128');
         setAddTestCaseError(null);
-        // setIsAddingTestCase(false); // Keep this to avoid UI flicker if modal closes fast
+        
     };
 
     useEffect(() => {
         if (!show) {
             const timer = setTimeout(() => {
                 resetForm();
-            }, 150); // Delay for modal close animation
+            }, 150); 
             return () => clearTimeout(timer);
         } else {
-             // Clear previous error when modal is shown
+             
             setAddTestCaseError(null);
         }
     }, [show]);
 
     const handleAddTestCase = async (e: FormEvent) => {
         e.preventDefault();
-        setAddTestCaseError(null); // Clear previous errors on new attempt
+        setAddTestCaseError(null); 
 
         if (!assignmentDetails?.id || !newTestCaseBaseName.trim()) {
             setAddTestCaseError("Classroom context missing or Test case base name is required."); return;
@@ -78,8 +78,8 @@ export const AddTestCaseModal: React.FC<{
                 timeMsNum,
                 ramMbNum
             );
-            // resetForm(); // Handled by useEffect on show=false
-            await onSuccessCallback(); // This should eventually set 'show' to false
+            
+            await onSuccessCallback(); 
         } catch (err: any) {
             setAddTestCaseError(err.message || 'Failed to add test case.');
         } finally {
@@ -101,7 +101,7 @@ export const AddTestCaseModal: React.FC<{
                         Test Case Base Name <span className="text-red-500">*</span>
                     </label>
                     <input
-                        id="testCaseBaseNameModal" // Unique ID for modal
+                        id="testCaseBaseNameModal" 
                         type="text"
                         value={newTestCaseBaseName}
                         onChange={(e) => setNewTestCaseBaseName(e.target.value)}

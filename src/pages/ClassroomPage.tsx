@@ -1,4 +1,4 @@
-// src/pages/ClassroomPage.tsx
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import * as classroomService from '../services/classroomService';
@@ -45,7 +45,7 @@ const ClassroomPage: React.FC = () => {
     navigate('/dashboard', { replace: true });
   };
 
-  // Loading and Error States
+  
   if (isLoading) return <div className="container mx-auto mt-10 p-6 text-center">Loading classroom...</div>;
   if (error) return <div className="container mx-auto mt-10 p-6 text-center text-red-600">Error: {error}</div>;
   if (!details) return <div className="container mx-auto mt-10 p-6 text-center">Classroom not found.</div>;

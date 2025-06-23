@@ -1,4 +1,4 @@
-// src/contexts/AuthContext.tsx
+
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/authService';
@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     user: null,
     token: null,
     tokenExpiration: null,
-    isLoading: true, // Start as true to check local storage
+    isLoading: true, 
     error: null,
   });
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           });
           console.log("Auth data loaded from storage.");
         } else {
-          // Token expired
+          
           localStorage.removeItem(AUTH_TOKEN_KEY);
           setAuthState(prev => ({ ...prev, isLoading: false }));
           console.log("Stored token expired.");
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error) {
       console.error("Failed to load auth data from storage:", error);
-      localStorage.removeItem(AUTH_TOKEN_KEY); // Clear potentially corrupted data
+      localStorage.removeItem(AUTH_TOKEN_KEY); 
       setAuthState(prev => ({ ...prev, isLoading: false, error: "Failed to load session" }));
     }
   }, []);
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading: false,
         error: null,
       });
-      navigate('/dashboard'); // Redirect after successful login
+      navigate('/dashboard'); 
     } catch (err: any) {
       const errorMessage = err.message || 'Login failed. Please check your credentials.';
       setAuthState(prev => ({
@@ -118,18 +118,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isLoading: false,
       error: null,
     });
-    navigate('/login'); // Redirect to login after logout
+    navigate('/login'); 
     console.log("User logged out.");
   }, [navigate]);
 
-  // Optional: Check token expiration periodically or on specific actions
+  
   useEffect(() => {
     const checkTokenInterval = setInterval(() => {
       if (authState.tokenExpiration && authState.tokenExpiration <= new Date()) {
         console.log("Token expired during session, logging out.");
         logout();
       }
-    }, 60 * 1000); // Check every minute
+    }, 60 * 1000); 
 
     return () => clearInterval(checkTokenInterval);
   }, [authState.tokenExpiration, logout]);
@@ -152,7 +152,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (currentAuthDataString) {
                 try {
                     const currentAuthData: AuthResponse = JSON.parse(currentAuthDataString);
-                    const updatedAuthData = { ...currentAuthData, profilePhotoUrl: newPhotoUrl, username: updatedUser.username }; // ensure username is also up-to-date
+                    const updatedAuthData = { ...currentAuthData, profilePhotoUrl: newPhotoUrl, username: updatedUser.username }; 
                     localStorage.setItem(AUTH_TOKEN_KEY, JSON.stringify(updatedAuthData));
                 } catch (e) { console.error("Failed to update auth data in localStorage", e); }
             }
@@ -169,7 +169,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#F9F7F7]"> {/* Palette: Page Background */}
           {/* Animated Spinner */}
           <svg
-            className="animate-spin h-12 w-12 text-[#3F72AF]" // Palette: Primary Blue for spinner
+            className="animate-spin h-12 w-12 text-[#3F72AF]" 
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"

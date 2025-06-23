@@ -1,9 +1,9 @@
-// src/components/ClassroomTopElement.tsx
+
 import React, { useState, useRef, ChangeEvent, FormEvent, useMemo } from 'react';
 import { ClassroomDetailsDto, ClassroomMemberDto, ClassroomRole, LeaveClassroomPayload, UpdateClassroomPayload } from "../types/classroom";
-import * as classroomService from '../services/classroomService'; // Assuming service functions are here
-import { Modal } from './Modal'; // Assuming you have a reusable Modal component
-import { FaEdit, FaTrashAlt, FaImage, FaCamera, FaBan, FaSignOutAlt, FaUserCircle, FaSearch } from 'react-icons/fa'; // Example icons
+import * as classroomService from '../services/classroomService'; 
+import { Modal } from './Modal'; 
+import { FaEdit, FaTrashAlt, FaImage, FaCamera, FaBan, FaSignOutAlt, FaUserCircle, FaSearch } from 'react-icons/fa'; 
 
 
 export const ClassroomTopElement: React.FC<{
@@ -14,19 +14,19 @@ export const ClassroomTopElement: React.FC<{
     const isOwner = classroomDetails.currentUserRole === ClassroomRole.Owner;
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Edit Details Modal State
+    
     const [showEditModal, setShowEditModal] = useState(false);
     const [editedName, setEditedName] = useState(classroomDetails.name);
     const [editedDescription, setEditedDescription] = useState(classroomDetails.description || '');
     const [isUpdatingDetails, setIsUpdatingDetails] = useState(false);
     const [editError, setEditError] = useState<string | null>(null);
 
-    // Photo States
+    
     const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
     const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
     const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
 
-    // Delete Classroom State
+    
     const [isDeletingClassroom, setIsDeletingClassroom] = useState(false);
 
     const [showPromoteOwnerModal, setShowPromoteOwnerModal] = useState(false);
@@ -45,25 +45,25 @@ export const ClassroomTopElement: React.FC<{
     };
 
     const handleInitiateLeaveClassroom = () => {
-        setLeaveError(null); // Clear previous errors
+        setLeaveError(null); 
         if (!window.confirm("Are you sure you want to leave this classroom?")) return;
 
         if (isOwner) {
             const teachers = classroomDetails.members.filter(
-                m => m.role === ClassroomRole.Teacher && m.userId !== classroomDetails.members.find(mem => mem.role === ClassroomRole.Owner)?.userId // Exclude current owner if they are also listed as teacher for some reason
+                m => m.role === ClassroomRole.Teacher && m.userId !== classroomDetails.members.find(mem => mem.role === ClassroomRole.Owner)?.userId 
             );
             setAvailableTeachers(teachers);
 
             if (teachers.length === 0) {
-                // Backend will also check this, but good to inform user upfront
+                
                 setLeaveError("As the owner, you must promote a teacher to be the new owner before you can leave. If no teachers are available, add one or delete the classroom.");
-                // No modal shown in this case, error displayed directly or via alert
+                
                 alert("As the owner, you must promote a teacher to be the new owner before you can leave. If no teachers are available, add one or delete the classroom, or consider deleting the classroom if you are the last privileged member.");
                 return;
             }
             setShowPromoteOwnerModal(true);
         } else {
-            // Student or Teacher leaving
+            
             performLeave();
         }
     };
@@ -74,15 +74,15 @@ export const ClassroomTopElement: React.FC<{
         try {
             const payload: LeaveClassroomPayload = newOwnerId ? { newOwnerUserId: newOwnerId } : {};
             await classroomService.leaveClassroom(classroomDetails.id, payload);
-            onClassroomLeave(); // Callback to parent (e.g., navigate to dashboard)
+            onClassroomLeave(); 
         } catch (err: any) {
             setLeaveError(err.message || "Failed to leave classroom.");
-            // If it's from the modal, error will show in modal. If direct leave, consider how to show.
+            
             if (!showPromoteOwnerModal) alert(`Error leaving classroom: ${err.message}`);
 
         } finally {
             setIsLeaving(false);
-            setShowPromoteOwnerModal(false); // Ensure modal closes if it was open
+            setShowPromoteOwnerModal(false); 
         }
     };
 
@@ -113,7 +113,7 @@ export const ClassroomTopElement: React.FC<{
             const payload: UpdateClassroomPayload = { name: editedName, description: editedDescription };
             await classroomService.updateClassroomDetails(classroomDetails.id, payload);
             setShowEditModal(false);
-            await onClassroomUpdate(); // Refresh data in parent
+            await onClassroomUpdate(); 
         } catch (err: any) {
             setEditError(err.message || "Failed to save changes.");
         } finally {
@@ -134,19 +134,19 @@ export const ClassroomTopElement: React.FC<{
             setPhotoUploadError(err.message || "Failed to upload photo.");
         } finally {
             setIsUploadingPhoto(false);
-            if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+            if (fileInputRef.current) fileInputRef.current.value = ""; 
         }
     };
 
     const handleDeletePhoto = async () => {
         if (!window.confirm("Are you sure you want to remove the classroom photo?")) return;
         setIsDeletingPhoto(true);
-        setPhotoUploadError(null); // Clear previous upload errors
+        setPhotoUploadError(null); 
         try {
             await classroomService.deleteClassroomPhoto(classroomDetails.id);
             await onClassroomUpdate();
         } catch (err: any) {
-            // Use photoUploadError state for consistency or create a new one
+            
             setPhotoUploadError(err.message || "Failed to delete photo.");
         } finally {
             setIsDeletingPhoto(false);
@@ -158,9 +158,9 @@ export const ClassroomTopElement: React.FC<{
         setIsDeletingClassroom(true);
         try {
             await classroomService.deleteClassroom(classroomDetails.id);
-            onClassroomLeave(); // Navigate away
+            onClassroomLeave(); 
         } catch (err: any) {
-            alert(`Failed to delete classroom: ${err.message}`); // Simple alert for critical error
+            alert(`Failed to delete classroom: ${err.message}`); 
         } finally {
             setIsDeletingClassroom(false);
         }
