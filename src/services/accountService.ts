@@ -2,8 +2,8 @@ import api from './api';
 import { ChangeUsernamePayload, ChangePasswordPayload } from '../types/account';
 import { UserProfileDto } from '../types/auth';
 
-const API_BASE_PATH = '/api/auth/account';
-const PHOTO_API_BASE_PATH = '/api/user/profile/photo';
+const API_BASE_PATH = `${import.meta.env.VITE_API_BASE_LOGIN}`
+const PHOTO_API_BASE_PATH = `${import.meta.env.VITE_API_BASE_PHOTO_USER}`
 
 export const changeUsername = async (payload: ChangeUsernamePayload): Promise<void> => {
     try {

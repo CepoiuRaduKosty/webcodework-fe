@@ -3,10 +3,12 @@
 import { TestCaseDetailDto, TestCaseListDto } from '../types/testcase';
 import api from './api';
 
+const API_BASE_TESTCASES = `${import.meta.env.VITE_API_BASE_TESTCASES}`
+const API_BASE_ASSIGNMENTS = `${import.meta.env.VITE_API_BASE_ASSIGNMENTS}`
 
 export const getTestCaseInputContent = async (testCaseId: string | number): Promise<string> => {
     try {
-        const response = await api.get<string>(`/api/testcases/${testCaseId}/input/content`, { headers: { 'Accept': 'text/plain' }});
+        const response = await api.get<string>(`${API_BASE_TESTCASES}/${testCaseId}/input/content`, { headers: { 'Accept': 'text/plain' }});
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to fetch test case input content');
@@ -15,7 +17,7 @@ export const getTestCaseInputContent = async (testCaseId: string | number): Prom
 
 export const getTestCaseOutputContent = async (testCaseId: string | number): Promise<string> => {
     try {
-        const response = await api.get<string>(`/api/testcases/${testCaseId}/output/content`, { headers: { 'Accept': 'text/plain' }});
+        const response = await api.get<string>(`${API_BASE_TESTCASES}/${testCaseId}/output/content`, { headers: { 'Accept': 'text/plain' }});
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to fetch test case output content');
@@ -24,7 +26,7 @@ export const getTestCaseOutputContent = async (testCaseId: string | number): Pro
 
 export const updateTestCaseInputContent = async (testCaseId: string | number, content: string): Promise<void> => {
     try {
-        await api.put(`/api/testcases/${testCaseId}/input/content`, content, { headers: { 'Content-Type': 'text/plain' } });
+        await api.put(`${API_BASE_TESTCASES}/${testCaseId}/input/content`, content, { headers: { 'Content-Type': 'text/plain' } });
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to save test case input content');
     }
@@ -32,7 +34,7 @@ export const updateTestCaseInputContent = async (testCaseId: string | number, co
 
 export const updateTestCaseOutputContent = async (testCaseId: string | number, content: string): Promise<void> => {
      try {
-        await api.put(`/api/testcases/${testCaseId}/output/content`, content, { headers: { 'Content-Type': 'text/plain' } });
+        await api.put(`${API_BASE_TESTCASES}/${testCaseId}/output/content`, content, { headers: { 'Content-Type': 'text/plain' } });
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to save test case output content');
     }
@@ -49,7 +51,7 @@ export const addTestCase = async (assignmentId: string | number, inputFileName: 
 
     try {
         const response = await api.post<TestCaseDetailDto>(
-            `/api/assignments/${assignmentId}/testcases`, 
+            `${API_BASE_ASSIGNMENTS}/${assignmentId}/testcases`, 
             formData, 
             { 
                 headers: {
@@ -71,7 +73,7 @@ export const addTestCase = async (assignmentId: string | number, inputFileName: 
 
 export const getTestCases = async (assignmentId: string | number): Promise<TestCaseListDto[]> => {
     try {
-        const response = await api.get<TestCaseListDto[]>(`/api/assignments/${assignmentId}/testcases`);
+        const response = await api.get<TestCaseListDto[]>(`${API_BASE_ASSIGNMENTS}/${assignmentId}/testcases`);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to fetch test cases');
@@ -80,7 +82,7 @@ export const getTestCases = async (assignmentId: string | number): Promise<TestC
 
 export const deleteTestCase = async (assignmentId: string | number, testCaseId: string | number): Promise<void> => {
     try {
-        await api.delete(`/api/assignments/${assignmentId}/testcases/${testCaseId}`);
+        await api.delete(`${API_BASE_ASSIGNMENTS}/${assignmentId}/testcases/${testCaseId}`);
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to delete test case');
     }
@@ -91,7 +93,7 @@ export const updateTestCasePrivacy = async (
     isPrivate: boolean
 ): Promise<void> => {
     try {
-        await api.patch(`/api/testcases/${testCaseId}/privacy`, { isPrivate });
+        await api.patch(`${API_BASE_TESTCASES}/${testCaseId}/privacy`, { isPrivate });
     } catch (error: any) {
         console.error("Update Test Case Privacy Error:", error.response?.data || error.message);
         throw error.response?.data || new Error('Failed to update test case privacy.');

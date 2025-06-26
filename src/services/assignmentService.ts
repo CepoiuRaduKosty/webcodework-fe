@@ -12,11 +12,13 @@ import {
 } from '../types/assignment.ts'; 
 import { TeacherSubmissionViewDto } from '../types/assignment.ts'
 
-
+const API_CLASSROOMS_BASE = `${import.meta.env.VITE_API_BASE_CLASSROOMS}`
+const API_ASSIGNMENTS_BASE = `${import.meta.env.VITE_API_BASE_ASSIGNMENTS}`
+const API_SUBMISSIONS_BASE = `${import.meta.env.VITE_API_BASE_SUBMISSIONS}`
 
 export const getAssignmentsForClassroom = async (classroomId: string | number): Promise<AssignmentBasicDto[]> => {
     try {
-        const response = await api.get<AssignmentBasicDto[]>(`/api/classrooms/${classroomId}/assignments`);
+        const response = await api.get<AssignmentBasicDto[]>(`${API_CLASSROOMS_BASE}/${classroomId}/assignments`);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to fetch assignments');
@@ -25,8 +27,7 @@ export const getAssignmentsForClassroom = async (classroomId: string | number): 
 
 export const createAssignment = async (classroomId: string | number, payload: CreateAssignmentDto): Promise<AssignmentDetailsDto> => {
     try {
-        
-        const response = await api.post<AssignmentDetailsDto>(`/api/classrooms/${classroomId}/assignments`, payload);
+        const response = await api.post<AssignmentDetailsDto>(`${API_CLASSROOMS_BASE}/${classroomId}/assignments`, payload);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to create assignment');
@@ -35,7 +36,7 @@ export const createAssignment = async (classroomId: string | number, payload: Cr
 
 export const getAssignmentDetails = async (assignmentId: string | number): Promise<AssignmentDetailsDto> => {
     try {
-        const response = await api.get<AssignmentDetailsDto>(`/api/assignments/${assignmentId}`);
+        const response = await api.get<AssignmentDetailsDto>(`${API_ASSIGNMENTS_BASE}/${assignmentId}`);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error(`Failed to fetch details for assignment ${assignmentId}`);
@@ -46,7 +47,7 @@ export const getAssignmentDetails = async (assignmentId: string | number): Promi
 
 export const getMySubmission = async (assignmentId: string | number): Promise<SubmissionDto> => {
     try {
-        const response = await api.get<SubmissionDto>(`/api/assignments/${assignmentId}/submissions/my`);
+        const response = await api.get<SubmissionDto>(`${API_ASSIGNMENTS_BASE}/${assignmentId}/submissions/my`);
         return response.data;
     } catch (error: any) {
         
@@ -64,7 +65,7 @@ export const uploadSubmissionFile = async (assignmentId: string | number, file: 
     formData.append('file', file); 
 
     try {
-        const response = await api.post<SubmittedFileDto>(`/api/assignments/${assignmentId}/submissions/my/files`, formData, {
+        const response = await api.post<SubmittedFileDto>(`${API_ASSIGNMENTS_BASE}/${assignmentId}/submissions/my/files`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data', 
             },
@@ -79,7 +80,7 @@ export const uploadSubmissionFile = async (assignmentId: string | number, file: 
 
 export const deleteSubmissionFile = async (submissionId: string | number, fileId: string | number): Promise<void> => {
     try {
-        await api.delete(`/api/submissions/${submissionId}/files/${fileId}`);
+        await api.delete(`${API_SUBMISSIONS_BASE}/${submissionId}/files/${fileId}`);
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to delete file');
     }
@@ -88,7 +89,7 @@ export const deleteSubmissionFile = async (submissionId: string | number, fileId
 export const submitAssignment = async (assignmentId: string | number): Promise<SubmissionDto> => {
      try {
         
-        const response = await api.post<SubmissionDto>(`/api/assignments/${assignmentId}/submissions/my/submit`);
+        const response = await api.post<SubmissionDto>(`${API_ASSIGNMENTS_BASE}/${assignmentId}/submissions/my/submit`);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to submit assignment');
@@ -97,7 +98,7 @@ export const submitAssignment = async (assignmentId: string | number): Promise<S
 
 export const getSubmissionsForAssignment = async (assignmentId: string | number): Promise<TeacherSubmissionViewDto[]> => {
     try {
-        const response = await api.get<TeacherSubmissionViewDto[]>(`/api/assignments/${assignmentId}/submissions`);
+        const response = await api.get<TeacherSubmissionViewDto[]>(`${API_ASSIGNMENTS_BASE}/${assignmentId}/submissions`);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to fetch assignment submissions');
@@ -107,7 +108,7 @@ export const getSubmissionsForAssignment = async (assignmentId: string | number)
 export const getFileContent = async (submissionId: string | number, fileId: string | number): Promise<string> => {
     try {
         
-        const response = await api.get<string>(`/api/submissions/${submissionId}/files/${fileId}/content`, {
+        const response = await api.get<string>(`${API_SUBMISSIONS_BASE}/${submissionId}/files/${fileId}/content`, {
             headers: { 'Accept': 'text/plain' }, 
             
             
@@ -121,7 +122,7 @@ export const getFileContent = async (submissionId: string | number, fileId: stri
 
 export const updateFileContent = async (submissionId: string | number, fileId: string | number, content: string): Promise<void> => { 
     try {
-        await api.put(`/api/submissions/${submissionId}/files/${fileId}/content`, content, { 
+        await api.put(`${API_SUBMISSIONS_BASE}/${submissionId}/files/${fileId}/content`, content, { 
             headers: { 'Content-Type': 'text/plain' }, 
         });
         
@@ -133,7 +134,7 @@ export const updateFileContent = async (submissionId: string | number, fileId: s
 export const createVirtualFile = async (assignmentId: string | number, fileName: string): Promise<SubmittedFileDto> => {
     try {
         const payload: CreateVirtualFilePayload = { fileName };
-        const response = await api.post<SubmittedFileDto>(`/api/assignments/${assignmentId}/submissions/my/create-file`, payload);
+        const response = await api.post<SubmittedFileDto>(`${API_ASSIGNMENTS_BASE}/${assignmentId}/submissions/my/create-file`, payload);
         return response.data;
     } catch (error: any) {
          throw error.response?.data || new Error(`Failed to create file '${fileName}'`);
@@ -145,7 +146,7 @@ export const updateAssignment = async (
     payload: UpdateAssignmentPayload
 ): Promise<AssignmentDetailsDto> => { 
     try {
-        const response = await api.put<AssignmentDetailsDto>(`/api/assignments/${assignmentId}`, payload);
+        const response = await api.put<AssignmentDetailsDto>(`${API_ASSIGNMENTS_BASE}/${assignmentId}`, payload);
         return response.data;
     } catch (error: any) {
         const errorMessage = error.response?.data?.errors?.Title?.join(', ') ||
@@ -158,7 +159,7 @@ export const updateAssignment = async (
 
 export const deleteAssignment = async (assignmentId: string | number): Promise<void> => {
     try {
-        await api.delete(`/api/assignments/${assignmentId}`);
+        await api.delete(`${API_ASSIGNMENTS_BASE}/${assignmentId}`);
     } catch (error: any) {
         throw error.response?.data?.message || error.message || 'Failed to delete assignment.';
     }
@@ -172,7 +173,7 @@ export const downloadSubmittedFile = async (
     try {
         const response = await api.get(
             
-            `/api/submissions/${submissionId}/files/${fileId}/download`,
+            `${API_SUBMISSIONS_BASE}/${submissionId}/files/${fileId}/download`,
             
             
             {
@@ -217,7 +218,7 @@ export const downloadSubmittedFile = async (
 
 export const unsubmitStudentSubmission = async (submissionId: string | number): Promise<SubmissionDto> => {
     try {
-        const response = await api.post<SubmissionDto>(`/api/submissions/${submissionId}/unsubmit`);
+        const response = await api.post<SubmissionDto>(`${API_SUBMISSIONS_BASE}/${submissionId}/unsubmit`);
         return response.data;
     } catch (error: any) {
         const errorMessage = error.response?.data?.detail || 
@@ -230,7 +231,7 @@ export const unsubmitStudentSubmission = async (submissionId: string | number): 
 
 export const getSubmissionDetails = async (submissionId: string | number): Promise<SubmissionDto> => {
     try {
-        const response = await api.get<SubmissionDto>(`/api/submissions/${submissionId}`);
+        const response = await api.get<SubmissionDto>(`${API_SUBMISSIONS_BASE}/${submissionId}`);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error(`Failed to fetch submission details for ID ${submissionId}`);
@@ -242,7 +243,7 @@ export const gradeSubmission = async (
     payload: GradeSubmissionPayload
 ): Promise<SubmissionDto> => { 
     try {
-        const response = await api.put<SubmissionDto>(`/api/submissions/${submissionId}/grade`, payload);
+        const response = await api.put<SubmissionDto>(`${API_SUBMISSIONS_BASE}/${submissionId}/grade`, payload);
         return response.data;
     } catch (error: any) {
         const errorMessage = error.response?.data?.errors?.Grade?.join(', ') ||

@@ -2,9 +2,11 @@
 import api from './api';
 import { UserClassroomDto, ClassroomDetailsDto, ClassroomMemberDto, CreateClassroomPayload, AddMemberPayload, ClassroomRole, ClassroomPhotoUploadResponseDto, UpdateClassroomPayload, UserSearchResultDto, LeaveClassroomPayload} from '../types/classroom.ts'; 
 
+const API_BASE_CLASSROOMS = `${import.meta.env.VITE_API_BASE_CLASSROOMS}`
+
 export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
   try {
-    const response = await api.get<UserClassroomDto[]>('/api/classrooms/my');
+    const response = await api.get<UserClassroomDto[]>(`${API_BASE_CLASSROOMS}/my`);
     return response.data;
   } catch (error: any) {
     throw error.response?.data || new Error('Failed to fetch classrooms');
@@ -14,7 +16,7 @@ export const getMyClassrooms = async (): Promise<UserClassroomDto[]> => {
 export const createClassroom = async (payload: CreateClassroomPayload): Promise<any> => { 
   try {
     
-    const response = await api.post('/api/classrooms', payload);
+    const response = await api.post(API_BASE_CLASSROOMS, payload);
     return response.data;
   } catch (error: any) {
     throw error.response?.data || new Error('Failed to create classroom');
@@ -24,7 +26,7 @@ export const createClassroom = async (payload: CreateClassroomPayload): Promise<
 
 export const getClassroomDetails = async (classroomId: string | number): Promise<ClassroomDetailsDto> => {
   try {
-    const response = await api.get<ClassroomDetailsDto>(`/api/classrooms/${classroomId}/details`);
+    const response = await api.get<ClassroomDetailsDto>(`${API_BASE_CLASSROOMS}/${classroomId}/details`);
     return response.data;
   } catch (error: any) {
     throw error.response?.data || new Error(`Failed to fetch details for classroom ${classroomId}`);
@@ -33,7 +35,7 @@ export const getClassroomDetails = async (classroomId: string | number): Promise
 
 export const addTeacher = async (classroomId: string | number, payload: AddMemberPayload): Promise<ClassroomMemberDto> => {
     try {
-        const response = await api.post<ClassroomMemberDto>(`/api/classrooms/${classroomId}/teachers`, payload);
+        const response = await api.post<ClassroomMemberDto>(`${API_BASE_CLASSROOMS}/${classroomId}/teachers`, payload);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to add teacher');
@@ -42,7 +44,7 @@ export const addTeacher = async (classroomId: string | number, payload: AddMembe
 
 export const addStudent = async (classroomId: string | number, payload: AddMemberPayload): Promise<ClassroomMemberDto> => {
     try {
-        const response = await api.post<ClassroomMemberDto>(`/api/classrooms/${classroomId}/students`, payload);
+        const response = await api.post<ClassroomMemberDto>(`${API_BASE_CLASSROOMS}/${classroomId}/students`, payload);
         return response.data;
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to add student');
@@ -54,7 +56,7 @@ export const uploadClassroomPhoto = async (classroomId: string | number, photoFi
     formData.append('photoFile', photoFile);
 
     try {
-        const response = await api.post<ClassroomPhotoUploadResponseDto>(`/api/classrooms/${classroomId}/photo`, formData, {
+        const response = await api.post<ClassroomPhotoUploadResponseDto>(`${API_BASE_CLASSROOMS}/${classroomId}/photo`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -67,7 +69,7 @@ export const uploadClassroomPhoto = async (classroomId: string | number, photoFi
 
 export const deleteClassroomPhoto = async (classroomId: string | number): Promise<void> => {
     try {
-        await api.delete(`/api/classrooms/${classroomId}/photo`);
+        await api.delete(`${API_BASE_CLASSROOMS}/${classroomId}/photo`);
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to delete classroom photo');
     }
@@ -78,7 +80,7 @@ export const updateClassroomDetails = async (
     payload: UpdateClassroomPayload
 ): Promise<ClassroomDetailsDto> => { 
     try {
-        const response = await api.put<ClassroomDetailsDto>(`/api/classrooms/${classroomId}`, payload);
+        const response = await api.put<ClassroomDetailsDto>(`${API_BASE_CLASSROOMS}/${classroomId}`, payload);
         return response.data;
     } catch (error: any) {
         const errorMessage = error.response?.data?.errors?.Name?.join(', ') || 
@@ -92,7 +94,7 @@ export const updateClassroomDetails = async (
 
 export const deleteClassroom = async (classroomId: string | number): Promise<void> => {
     try {
-        await api.delete(`/api/classrooms/${classroomId}`);
+        await api.delete(`${API_BASE_CLASSROOMS}/${classroomId}`);
     } catch (error: any) {
         throw error.response?.data || new Error('Failed to delete classroom');
     }
@@ -108,7 +110,7 @@ export const searchPotentialMembers = async (
     }
     try {
         const response = await api.get<UserSearchResultDto[]>(
-            `/api/classrooms/${classroomId}/potential-members/search`,
+            `${API_BASE_CLASSROOMS}/${classroomId}/potential-members/search`,
             {
                 params: { searchTerm, limit }
             }
@@ -126,7 +128,7 @@ export const leaveClassroom = async (
 ): Promise<void> => {
     try {
         
-        await api.post(`/api/classrooms/${classroomId}/leave`, payload || {}); 
+        await api.post(`${API_BASE_CLASSROOMS}/${classroomId}/leave`, payload || {}); 
     } catch (error: any) {
         const errorMessage = error.response?.data?.detail || 
                              error.response?.data?.message || 
@@ -142,7 +144,7 @@ export const removeMemberFromClassroom = async (
 ): Promise<void> => {
     try {
         
-        await api.delete(`/api/classrooms/${classroomId}/members/${memberUserIdToRemove}`);
+        await api.delete(`${API_BASE_CLASSROOMS}/${classroomId}/members/${memberUserIdToRemove}`);
     } catch (error: any) {
         const errorMessage = error.response?.data?.detail || 
                              error.response?.data?.message ||
