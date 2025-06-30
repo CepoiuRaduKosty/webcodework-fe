@@ -76,7 +76,7 @@ const DashboardPage: React.FC = () => {
             {classroom.name}
           </h3>
           {classroom.description && (
-            <p className="text-xs text-gray-500 mt-1 flex-grow h-10 line-clamp-2" title={classroom.description}>
+            <p className="text-xs text-gray-500 mt-1 flex-grow h-15 line-clamp-2" title={classroom.description}>
               {classroom.description}
             </p>
           )}
