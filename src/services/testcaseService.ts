@@ -99,3 +99,15 @@ export const updateTestCasePrivacy = async (
         throw error.response?.data || new Error('Failed to update test case privacy.');
     }
 };
+
+export const generateAITestCase = async (assignmentId: string | number): Promise<TestCaseDetailDto> => {
+    try {
+        const response = await api.post<TestCaseDetailDto>(
+            `${API_BASE_ASSIGNMENTS}/${assignmentId}/testcases/generate`
+        );
+        return response.data;
+    } catch (error: any) {
+        console.error("Generate AI Test Case Error:", error.response?.data || error.message);
+        throw error.response?.data || new Error('Failed to generate AI test case.');
+    }
+};

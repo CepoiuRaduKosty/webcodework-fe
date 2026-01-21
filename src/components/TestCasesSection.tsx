@@ -4,18 +4,38 @@ import { AssignmentDetailsDto } from "../types/assignment";
 import * as testcaseService from '../services/testcaseService'; 
 import { TestCaseListDto } from "../types/testcase";        
 import { AddTestCaseModal } from "./modals/AddTestCaseModal";   
-import { FaPlus, FaListAlt, FaExclamationCircle, FaSpinner } from 'react-icons/fa'; 
+import { FaPlus, FaListAlt, FaExclamationCircle, FaSpinner, FaStar } from 'react-icons/fa'; 
 import { TestCaseList } from "./TestCaseList";
 
 export const TestCasesSection: React.FC<{ assignmentDetails: AssignmentDetailsDto, isEditable: boolean }> = ({ assignmentDetails, isEditable }) => {
     const [showAddTestCaseModal, setShowAddTestCaseModal] = useState(false);
     const [isLoadingTestCases, setIsLoadingTestCases] = useState(true);
     const [testCases, setTestCases] = useState<TestCaseListDto[]>([]);
-    const [fetchError, setFetchError] = useState<string | null>(null); 
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    const [isGeneratingTestCase, setIsGeneratingTestCase] = useState(false);
+    const [generateError, setGenerateError] = useState<string | null>(null); 
 
     const addTestCaseModalSuccessfulFinish = async () => {
         setShowAddTestCaseModal(false);
         await fetchTestCasesOverview(); 
+    };
+
+    const handleGenerateAITestCase = async () => {
+        if (!assignmentDetails?.id) return;
+        
+        setIsGeneratingTestCase(true);
+        setGenerateError(null);
+        
+        try {
+            await testcaseService.generateAITestCase(assignmentDetails.id);
+            await fetchTestCasesOverview();
+        } catch (err: any) {
+            const errorMsg = err.message || 'Failed to generate test case.';
+            setGenerateError(errorMsg);
+            console.error("Generate test case error:", err);
+        } finally {
+            setIsGeneratingTestCase(false);
+        }
     };
 
     const fetchTestCasesOverview = useCallback(async () => {
@@ -72,13 +92,26 @@ export const TestCasesSection: React.FC<{ assignmentDetails: AssignmentDetailsDt
                         <span className="text-base font-normal text-gray-500 ml-2">({testCases.length})</span>
                     </h2>
                     {isEditable && (
-                        <button
-                            onClick={() => { setShowAddTestCaseModal(true); }}
-                            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-[#3F72AF] rounded-md hover:bg-[#112D4E] focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:ring-offset-2 focus:ring-offset-white transition-colors duration-150"
-                            title="Add new test case"
-                        >
-                            <FaPlus className="mr-2 h-4 w-4" /> Add Test Case
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <button
+                                onClick={() => { setShowAddTestCaseModal(true); }}
+                                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-[#3F72AF] rounded-md hover:bg-[#112D4E] focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:ring-offset-2 focus:ring-offset-white transition-colors duration-150"
+                                title="Add new test case"
+                            >
+                                <FaPlus className="mr-2 h-4 w-4" /> Add Test Case
+                            </button>
+                            <button
+                                onClick={handleGenerateAITestCase}
+                                disabled={isGeneratingTestCase || isLoadingTestCases}
+                                className={`flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white transition-colors duration-150
+                                    ${isGeneratingTestCase ? 'bg-amber-500 cursor-wait' : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'}
+                                    ${isLoadingTestCases ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                title="Generate a test case using AI"
+                            >
+                                {isGeneratingTestCase ? <FaSpinner className="animate-spin mr-2 h-4 w-4" /> : <FaStar className="mr-2 h-4 w-4" />}
+                                {isGeneratingTestCase ? 'Generating...' : 'Generate with AI'}
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -96,6 +129,15 @@ export const TestCasesSection: React.FC<{ assignmentDetails: AssignmentDetailsDt
                         <FaExclamationCircle className="h-8 w-8 mb-2 text-red-600" />
                         <p className="font-semibold">Error Loading Test Cases</p>
                         <p className="text-sm">{fetchError}</p>
+                    </div>
+                )}
+
+                {/* Generate Error State */}
+                {generateError && (
+                    <div className="p-4 my-4 bg-red-50 text-red-700 border-2 border-red-300 rounded-lg shadow-md text-center flex flex-col items-center justify-center">
+                        <FaExclamationCircle className="h-8 w-8 mb-2 text-red-600" />
+                        <p className="font-semibold">Error Generating Test Case</p>
+                        <p className="text-sm">{generateError}</p>
                     </div>
                 )}
 
