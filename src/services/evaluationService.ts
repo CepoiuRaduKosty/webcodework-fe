@@ -1,6 +1,6 @@
 
 import api from './api';
-import { FrontendEvaluateResponseDto, LegitimacyEvaluationDto } from '../types/evaluation';
+import { FrontendEvaluateResponseDto, LegitimacyEvaluationDto, AIHintsDto } from '../types/evaluation';
 
 const API_BASE_EVALUATION = `${import.meta.env.VITE_API_BASE_EVALUATION}`
 
@@ -33,5 +33,15 @@ export const requestLegitimacyEvaluation = async (submissionId: number, forceRev
     } catch (error: any) {
         console.error("Request Legitimacy Evaluation Error:", error.response?.data || error.message);
         throw error.response?.data || new Error('Failed to request legitimacy evaluation.');
+    }
+};
+
+export const requestAIHints = async (assignmentId: number | string): Promise<AIHintsDto> => {
+    try {
+        const response = await api.post<AIHintsDto>(`/api/assignments/${assignmentId}/submissions/my/hint`);
+        return response.data;
+    } catch (error: any) {
+        console.error("Request AI Hints Error:", error.response?.data || error.message);
+        throw error.response?.data || new Error('Failed to request AI hints.');
     }
 };

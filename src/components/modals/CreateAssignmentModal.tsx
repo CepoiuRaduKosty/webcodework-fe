@@ -18,6 +18,7 @@ export const CreateAssignmentModal: React.FC<{
     const [newAssignmentDueDate, setNewAssignmentDueDate] = useState('');
     const [newAssignmentMaxPoints, setNewAssignmentMaxPoints] = useState<string>('');
     const [isCodeAssignment, setIsCodeAssignment] = useState<boolean>(false);
+    const [allowAIHints, setAllowAIHints] = useState<boolean>(false);
     const [isCreatingAssignment, setIsCreatingAssignment] = useState(false);
     const [createAssignmentError, setCreateAssignmentError] = useState<string | null>(null);
 
@@ -27,6 +28,7 @@ export const CreateAssignmentModal: React.FC<{
         setNewAssignmentDueDate('');
         setNewAssignmentMaxPoints('');
         setIsCodeAssignment(false);
+        setAllowAIHints(false);
         setCreateAssignmentError(null);
         
     };
@@ -62,7 +64,8 @@ export const CreateAssignmentModal: React.FC<{
             instructions: newAssignmentInstructions.trim() || undefined,
             dueDate: newAssignmentDueDate ? new Date(newAssignmentDueDate).toISOString() : null,
             maxPoints: maxPointsNum,
-            isCodeAssignment: isCodeAssignment
+            isCodeAssignment: isCodeAssignment,
+            allowAIHints: allowAIHints
         };
 
         try {
@@ -165,6 +168,29 @@ export const CreateAssignmentModal: React.FC<{
                         </div>
                     </div>
                 </div>
+
+                {isCodeAssignment && (
+                    <div className="pt-3 border-t border-[#DBE2EF]"> {/* Subtle separator */}
+                        <div className="relative flex items-start">
+                            <div className="flex items-center h-5">
+                                <input
+                                    id="allowAIHintsModal" 
+                                    name="allowAIHints"
+                                    type="checkbox"
+                                    checked={allowAIHints}
+                                    onChange={(e) => setAllowAIHints(e.target.checked)}
+                                    className="focus:ring-[#3F72AF] h-4 w-4 text-[#3F72AF] border-[#DBE2EF] rounded" 
+                                />
+                            </div>
+                            <div className="ml-3 text-sm">
+                                <label htmlFor="allowAIHintsModal" className="font-medium text-[#112D4E]">
+                                    Allow AI Hints
+                                </label>
+                                <p className="text-xs text-gray-500">Let students request AI-generated hints for their code.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="pt-4 flex justify-end space-x-3">
                     <button

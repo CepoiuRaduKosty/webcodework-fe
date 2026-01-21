@@ -84,6 +84,7 @@ export const AssignmentStudentWork: React.FC<{
                         <div className="my-2 py-2">
                              <AssignmentStudentEditCode
                                 assignmentId={assignmentId}
+                                assignmentDetails={assignmentDetails}
                                 mySubmission={mySubmission}
                                 callbackRefreshSubmittedFiles={fetchMySubmissionData}
                              />

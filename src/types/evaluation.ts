@@ -23,6 +23,12 @@ export interface LegitimacyEvaluationDto {
     evaluatedAt: string;
 }
 
+export interface AIHintsDto {
+    hint: string;
+    generatedByModel: string;
+    generatedAt: string;
+}
+
 
 export interface FrontendTestCaseResultDto {
     testCaseInputPath: string;

@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { SubmissionDto, SubmittedFileDto } from "../types/assignment";
+import { SubmissionDto, SubmittedFileDto, AssignmentDetailsDto } from "../types/assignment";
 import * as assignmentService from '../services/assignmentService';
 import * as evaluationService from '../services/evaluationService';
-import { FrontendEvaluateResponseDto } from "../types/evaluation";
+import { FrontendEvaluateResponseDto, AIHintsDto } from "../types/evaluation";
 import { Editor } from "@monaco-editor/react";
 import { AssignmentEvaluationResult } from "./AssignmentEvaluationResult";
 import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 import { SUPPORTED_LANGUAGES, SOLUTION_FILENAME } from "../config/languages"
-import { FaCode, FaExclamationCircle, FaPlay, FaSave, FaSpinner, FaTimes } from "react-icons/fa";
+import { FaCode, FaExclamationCircle, FaPlay, FaSave, FaSpinner, FaTimes, FaLightbulb } from "react-icons/fa";
 
-export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefined, mySubmission: SubmissionDto | null, callbackRefreshSubmittedFiles: () => Promise<void> }> = ({ assignmentId, mySubmission, callbackRefreshSubmittedFiles }) => {
+export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefined, assignmentDetails?: AssignmentDetailsDto, mySubmission: SubmissionDto | null, callbackRefreshSubmittedFiles: () => Promise<void> }> = ({ assignmentId, assignmentDetails, mySubmission, callbackRefreshSubmittedFiles }) => {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [editorContent, setEditorContent] = useState<string>('');
     const [editingFile, setEditingFile] = useState<SubmittedFileDto | null>(null); 
@@ -22,6 +22,11 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
     const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
     const [evaluationResult, setEvaluationResult] = useState<FrontendEvaluateResponseDto | null>(null);
     const [evaluationError, setEvaluationError] = useState<string | null>(null);
+
+    const [hints, setHints] = useState<AIHintsDto | null>(null);
+    const [isRequestingHints, setIsRequestingHints] = useState(false);
+    const [hintsError, setHintsError] = useState<string | null>(null);
+    const [showHintsModal, setShowHintsModal] = useState(false);
 
     const [hubConnection, setHubConnection] = useState<HubConnection | null>(null);
     const [isHubConnected, setIsHubConnected] = useState<boolean>(false);
@@ -148,6 +153,28 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
         }
     };
 
+    const handleRequestHints = async () => {
+        if (!assignmentId) {
+            setHintsError("Assignment ID missing.");
+            return;
+        }
+        
+        setIsRequestingHints(true);
+        setHintsError(null);
+        
+        try {
+            const result = await evaluationService.requestAIHints(assignmentId);
+            setHints(result);
+            setShowHintsModal(true);
+        } catch (err: any) {
+            const errorMsg = err.detail || err.message || "Failed to request hints.";
+            setHintsError(errorMsg);
+            alert(`Error: ${errorMsg}`);
+        } finally {
+            setIsRequestingHints(false);
+        }
+    };
+
     const handleEditorChange = (value: string | undefined) => {
         setEditorContent(value ?? '');
         if (saveStatus === 'saved') setSaveStatus('idle'); 
@@ -243,6 +270,20 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                             {isEvaluating ? 'Evaluating...' : `Evaluate (${selectedLanguage.toUpperCase()})`}
                         </button>
                     )}
+
+                    {assignmentDetails?.allowAIHints && solutionFileExists && !mySubmission?.submittedAt && (
+                        <button
+                            onClick={handleRequestHints}
+                            disabled={isRequestingHints || isEditorOpen}
+                            title="Get AI-powered hints for your code"
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#F9F7F7] transition-colors duration-150 flex items-center justify-center
+                                        ${isRequestingHints ? 'bg-amber-500 cursor-wait' : 'bg-amber-500 hover:bg-amber-600 focus:ring-amber-500'}
+                                        ${isEditorOpen ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        >
+                            {isRequestingHints ? <FaSpinner className="animate-spin mr-2"/> : <FaLightbulb className="mr-2"/>}
+                            {isRequestingHints ? 'Getting hints...' : 'Get Hints'}
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -307,6 +348,57 @@ export const AssignmentStudentEditCode: React.FC<{ assignmentId: string | undefi
                         </div>
                     )}
                     <AssignmentEvaluationResult isEvaluating={isEvaluating && !evaluationResult && !evaluationError} evaluationResult={evaluationResult} evaluationError={evaluationError} />
+                </div>
+            )}
+
+            {/* AI Hints Modal */}
+            {showHintsModal && hints && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-4 flex items-center justify-between sticky top-0">
+                            <div className="flex items-center">
+                                <FaLightbulb className="mr-3 h-6 w-6" />
+                                <h3 className="text-lg font-semibold">AI Hints for Your Code</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowHintsModal(false)}
+                                className="text-white hover:bg-amber-700 p-2 rounded-lg transition-colors"
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <h4 className="text-sm font-semibold text-[#112D4E] mb-3">Hint:</h4>
+                                <p className="text-sm text-slate-700 leading-relaxed">{hints.hint}</p>
+                            </div>
+
+                            <div className="border-t border-[#DBE2EF] pt-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <h5 className="text-xs font-semibold text-[#112D4E] uppercase tracking-wider text-gray-500">AI Model</h5>
+                                        <p className="text-sm text-[#112D4E] font-medium mt-1">{hints.generatedByModel}</p>
+                                    </div>
+                                    <div>
+                                        <h5 className="text-xs font-semibold text-[#112D4E] uppercase tracking-wider text-gray-500">Generated At</h5>
+                                        <p className="text-sm text-[#112D4E] font-medium mt-1">
+                                            {new Date(hints.generatedAt).toLocaleString()}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 px-6 py-4 border-t border-[#DBE2EF] flex justify-end sticky bottom-0">
+                            <button
+                                onClick={() => setShowHintsModal(false)}
+                                className="px-4 py-2 bg-[#3F72AF] text-white rounded-lg hover:bg-[#112D4E] transition-colors font-medium text-sm"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

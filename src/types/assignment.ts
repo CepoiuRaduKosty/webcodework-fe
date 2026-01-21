@@ -7,6 +7,7 @@ export interface CreateAssignmentDto {
     dueDate?: string | null; 
     maxPoints?: number | null;
     isCodeAssignment: boolean;
+    allowAIHints?: boolean;
 }
 
 
@@ -26,6 +27,7 @@ export interface AssignmentDetailsDto extends AssignmentBasicDto {
     createdByUsername: string;
     classroomId: number;
     isCodeAssignment: boolean;
+    allowAIHints?: boolean;
     
 }
 
@@ -85,4 +87,5 @@ export interface UpdateAssignmentPayload {
     instructions?: string | null;
     dueDate?: string | null;
     maxPoints?: number | null;
+    allowAIHints?: boolean;
 }

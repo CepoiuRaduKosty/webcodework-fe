@@ -24,6 +24,7 @@ export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
         assignment.dueDate ? new Date(assignment.dueDate).toISOString().substring(0, 16) : ''
     );
     const [maxPoints, setMaxPoints] = useState(assignment.maxPoints?.toString() || '');
+    const [allowAIHints, setAllowAIHints] = useState(assignment.allowAIHints || false);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
             setInstructions(assignment.instructions || '');
             setDueDate(assignment.dueDate ? new Date(assignment.dueDate).toISOString().substring(0, 16) : '');
             setMaxPoints(assignment.maxPoints?.toString() || '');
+            setAllowAIHints(assignment.allowAIHints || false);
             setError(null); 
         }
     }, [isOpen, assignment]);
@@ -55,6 +57,7 @@ export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
             instructions: instructions.trim() || undefined,
             dueDate: dueDate ? new Date(dueDate).toISOString() : null,
             maxPoints: pointsNum,
+            allowAIHints: allowAIHints,
         };
 
         try {
@@ -94,6 +97,23 @@ export const EditAssignmentModal: React.FC<EditAssignmentModalProps> = ({
                             className="w-full px-3 py-2 border border-[#DBE2EF] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3F72AF] focus:border-[#3F72AF] text-[#112D4E]" />
                     </div>
                 </div>
+                {assignment.isCodeAssignment && (
+                    <div className="pt-3 border-t border-[#DBE2EF]">
+                        <div className="relative flex items-start">
+                            <input
+                                id="editAllowAIHintsModal"
+                                type="checkbox"
+                                checked={allowAIHints}
+                                onChange={(e) => setAllowAIHints(e.target.checked)}
+                                className="focus:ring-[#3F72AF] h-4 w-4 text-[#3F72AF] border-[#DBE2EF] rounded"
+                            />
+                            <label htmlFor="editAllowAIHintsModal" className="ml-3">
+                                <span className="font-medium text-[#112D4E]">Allow AI Hints</span>
+                                <p className="text-xs text-gray-500">Let students request AI-generated hints for their code.</p>
+                            </label>
+                        </div>
+                    </div>
+                )}
                 <div className="pt-4 flex justify-end space-x-3">
                     <button type="button" onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#DBE2EF] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors">
