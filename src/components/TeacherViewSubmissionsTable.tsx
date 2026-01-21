@@ -3,7 +3,7 @@ import React, { useMemo, useState, useEffect, JSX } from "react";
 import { AssignmentDetailsDto, TeacherSubmissionViewDto } from "../types/assignment";
 import { format, parseISO, isValid } from "date-fns";
 import {
-    FaUserCircle, FaCheckCircle, FaTimesCircle, FaExclamationTriangle,
+    FaCheckCircle, FaTimesCircle, FaExclamationTriangle,
     FaCog, FaHourglassHalf, FaFileArchive, FaQuestionCircle, FaEdit,
     FaSpinner, FaClipboardList, FaMemory, FaInfoCircle, FaSearch,
     FaChevronLeft, FaChevronRight,
@@ -78,7 +78,6 @@ export const TeacherViewSubmissionsTable: React.FC<TeacherViewSubmissionsTablePr
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [unsubmittingSubmissionId, setUnsubmittingSubmissionId] = useState<number | null>(null);
-    const [unsubmitError, setUnsubmitError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const filteredSubmissions = useMemo(() => {
@@ -136,13 +135,11 @@ export const TeacherViewSubmissionsTable: React.FC<TeacherViewSubmissionsTablePr
             return;
         }
         setUnsubmittingSubmissionId(submissionId);
-        setUnsubmitError(null);
         try {
             await assignmentService.unsubmitStudentSubmission(submissionId);
             await refreshSubmissions(); 
             
         } catch (err: any) {
-            setUnsubmitError(err.message || "Failed to unsubmit.");
             alert(`Error: ${err.message || "Failed to unsubmit."}`); 
         } finally {
             setUnsubmittingSubmissionId(null);

@@ -13,6 +13,16 @@ export enum EvaluationStatus {
     InternalError = "INTERNAL_ERROR"
 }
 
+export type LegitimacyStatus = "legitimate" | "suspicious" | "inconclusive";
+
+export interface LegitimacyEvaluationDto {
+    status: LegitimacyStatus;
+    confidenceScore: number;
+    analysis: string;
+    evaluatedByModel: string;
+    evaluatedAt: string;
+}
+
 
 export interface FrontendTestCaseResultDto {
     testCaseInputPath: string;
